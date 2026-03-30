@@ -79,6 +79,20 @@
   --sidebar-ring: #61B3CF;
 }
 
+/* React Flow dark theme overrides */
+.react-flow {
+  --xy-background-color: #050A13;
+  --xy-node-border-radius: 8px;
+  --xy-edge-stroke: #61B3CF;
+  --xy-edge-stroke-selected: #61B3CF;
+  --xy-edge-stroke-width: 2;
+  --xy-attribution-background-color: transparent;
+}
+
+.react-flow .react-flow__attribution {
+  display: none;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

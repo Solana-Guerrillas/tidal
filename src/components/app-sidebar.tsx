@@ -71,8 +71,8 @@ export function AppSidebar() {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton tooltip="Tidal Swap">
-                <ArrowsLeftRight weight="bold" />
-                <span>Tidal Swap</span>
+                <ArrowsLeftRight weight="bold" className="text-tidal-accent" />
+                <span className="text-tidal-accent">Tidal Swap</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -82,7 +82,7 @@ export function AppSidebar() {
 
         {/* Tidal Pool */}
         <SidebarGroup>
-          <SidebarGroupLabel>
+          <SidebarGroupLabel className="text-tidal-accent">
             <Waves weight="bold" className="mr-2" />
             Tidal Pool
           </SidebarGroupLabel>
@@ -103,7 +103,7 @@ export function AppSidebar() {
 
         {/* Tidal Amplify */}
         <SidebarGroup>
-          <SidebarGroupLabel>
+          <SidebarGroupLabel className="text-tidal-accent">
             <Lightning weight="bold" className="mr-2" />
             Tidal Amplify
           </SidebarGroupLabel>
@@ -111,9 +111,11 @@ export function AppSidebar() {
             <SidebarMenu>
               {amplifyItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton tooltip={item.title} className="pl-6">
-                    <span>{item.title}</span>
-                  </SidebarMenuButton>
+                  <a href="/amplify">
+                    <SidebarMenuButton tooltip={item.title} className="pl-6">
+                      <span>{item.title}</span>
+                    </SidebarMenuButton>
+                  </a>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
@@ -124,7 +126,7 @@ export function AppSidebar() {
 
         {/* Chats */}
         <SidebarGroup>
-          <SidebarGroupLabel>
+          <SidebarGroupLabel className="text-tidal-accent">
             <ChatCircle weight="bold" className="mr-2" />
             Chats
           </SidebarGroupLabel>
