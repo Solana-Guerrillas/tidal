@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import {
   ReactFlow,
   Controls,
@@ -255,15 +255,51 @@ const initialEdges: Edge<{ asset: string }>[] = [
   },
 ];
 
+const STORAGE_KEY = "amplify-node-positions";
+
 export default function AmplifyPage() {
-  const [nodes, , onNodesChange] = useNodesState(initialNodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const { setOpen } = useSidebar();
 
-  // Collapse sidebar on mount
+  const hasMounted = useRef(false);
+
+  // Collapse sidebar on initial mount only + restore saved positions
   useEffect(() => {
-    setOpen(false);
-  }, [setOpen]);
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+      setOpen(false);
+    }
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const positions: Record<string, { x: number; y: number }> =
+          JSON.parse(saved);
+        setNodes((nds) =>
+          nds.map((node) =>
+            positions[node.id]
+              ? { ...node, position: positions[node.id] }
+              : node
+          )
+        );
+      }
+    } catch {
+      // ignore
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Save positions to localStorage when a drag ends
+  const onNodeDragStop = useCallback(() => {
+    setNodes((currentNodes) => {
+      const positions: Record<string, { x: number; y: number }> = {};
+      for (const node of currentNodes) {
+        positions[node.id] = node.position;
+      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(positions));
+      return currentNodes;
+    });
+  }, [setNodes]);
 
   const onConnect: OnConnect = useCallback(
     (params) => setEdges((eds) => addEdge(params, eds)),
@@ -285,6 +321,7 @@ export default function AmplifyPage() {
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
+          onNodeDragStop={onNodeDragStop}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           fitView
