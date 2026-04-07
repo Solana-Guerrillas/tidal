@@ -25,7 +25,7 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { Card, CardContent } from "@/components/ui/card";
-import type { SidebarNavigation } from "@/features/shell/types";
+import type { SidebarNavigation } from "@/mock-data/shell/types";
 
 type AppSidebarProps = {
   navigation: SidebarNavigation;
@@ -143,7 +143,10 @@ export function AppSidebar({ navigation }: AppSidebarProps) {
       </SidebarContent>
 
       <SidebarFooter className="p-2">
-        <Card size="sm" className="bg-tidal-card ring-tidal-border group-data-[collapsible=icon]:hidden">
+        <Card
+          size="sm"
+          className="bg-tidal-card ring-tidal-border group-data-[collapsible=icon]:hidden"
+        >
           <CardContent className="flex items-center gap-3">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-tidal-accent">
               <User weight="bold" className="h-4 w-4 text-tidal-card" />

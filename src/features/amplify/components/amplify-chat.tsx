@@ -1,8 +1,11 @@
 "use client";
 
-import { ChatInput } from "@/components/chat-input";
-import type { AmplifyChatMessage } from "@/features/amplify/types";
-import type { AppMode } from "@/features/shell/types";
+import { ChatMessage } from "@/components/tidal/chat-message";
+import { PromptComposer } from "@/components/tidal/prompt-composer";
+import { SectionLabel } from "@/components/tidal/section-label";
+import { SuggestionAction } from "@/components/tidal/suggestion-action";
+import type { AmplifyChatMessage } from "@/mock-data/amplify/types";
+import type { AppMode } from "@/mock-data/shell/types";
 
 type AmplifyChatProps = {
   messages: AmplifyChatMessage[];
@@ -33,49 +36,38 @@ export function AmplifyChat({
       <div className="flex min-h-0 flex-1 flex-col justify-end gap-[27px] px-[43px] pb-5">
         <div className="flex flex-col gap-2">
           {aiMessages.map((message, index) => (
-            <p key={`${message.role}-${index}`} className="text-[13px]/[20px] text-tidal-muted">
+            <ChatMessage key={`${message.role}-${index}`} role="ai">
               {message.content}
-            </p>
+            </ChatMessage>
           ))}
         </div>
 
         <div className="flex flex-col gap-2">
-          <span className="text-[11px]/[14px] text-tidal-muted">
-            Suggestions
-          </span>
+          <SectionLabel>Suggestions</SectionLabel>
           <div className="flex flex-wrap items-center gap-2">
             {suggestions.map((suggestion) => (
-              <div
-                key={suggestion}
-                className="cursor-pointer rounded-[4px] border border-tidal-accent/50 bg-tidal-card px-3 py-1.5 text-[11px]/[14px] font-medium text-tidal-accent"
-              >
-                {suggestion}
-              </div>
+              <SuggestionAction key={suggestion}>{suggestion}</SuggestionAction>
             ))}
           </div>
         </div>
 
         {userMessages.map((message, index) => (
-          <div key={`${message.role}-${index}`} className="flex justify-end">
-            <div className="rounded-[10px] border border-tidal-border bg-tidal-card p-5">
-              <p className="text-[13px]/[20px] font-medium text-tidal-muted">
-                {message.content}
-              </p>
-            </div>
-          </div>
+          <ChatMessage key={`${message.role}-${index}`} role="user">
+            {message.content}
+          </ChatMessage>
         ))}
       </div>
 
       <div className="flex shrink-0 flex-col items-center gap-3 px-[43px] pt-5">
-        <ChatInput
-          className="w-full rounded-full px-[17px]"
+        <PromptComposer
+          className="w-full"
           mode={mode}
           defaultMode={defaultMode}
           onModeChange={onModeChange}
           value={inputValue}
           onValueChange={onInputValueChange}
           onSubmit={onSubmit}
-          sendButtonClassName="rounded-full"
+          surface="pill"
         />
 
         <span className="text-center text-[11px]/[14px] font-medium text-tidal-placeholder">

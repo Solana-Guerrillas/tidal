@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -10,9 +11,39 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { appModes, type AppMode } from "@/features/shell/types";
+import { appModes, type AppMode } from "@/mock-data/shell/types";
 
-type ChatInputProps = {
+const promptComposerVariants = cva(
+  "flex items-center justify-between border border-tidal-border bg-tidal-card",
+  {
+    variants: {
+      surface: {
+        default: "w-1/2 rounded-lg px-[10px] py-[9px] pl-3",
+        pill: "w-full rounded-full px-[17px] py-[9px]",
+      },
+    },
+    defaultVariants: {
+      surface: "default",
+    },
+  }
+);
+
+const promptComposerSendButtonVariants = cva(
+  "flex h-[30px] w-[30px] items-center justify-center bg-tidal-accent",
+  {
+    variants: {
+      surface: {
+        default: "rounded-md",
+        pill: "rounded-full",
+      },
+    },
+    defaultVariants: {
+      surface: "default",
+    },
+  }
+);
+
+export type PromptComposerProps = {
   className?: string;
   inputClassName?: string;
   modeTriggerClassName?: string;
@@ -26,9 +57,9 @@ type ChatInputProps = {
   placeholder?: string;
   modes?: readonly AppMode[];
   onSubmit?: () => void;
-};
+} & VariantProps<typeof promptComposerVariants>;
 
-export function ChatInput({
+export function PromptComposer({
   className,
   inputClassName,
   modeTriggerClassName,
@@ -42,7 +73,8 @@ export function ChatInput({
   placeholder = "Message Tidal",
   modes = appModes,
   onSubmit,
-}: ChatInputProps) {
+  surface,
+}: PromptComposerProps) {
   const [uncontrolledMode, setUncontrolledMode] = useState<AppMode>(defaultMode);
   const [uncontrolledValue, setUncontrolledValue] = useState(defaultValue);
 
@@ -65,10 +97,7 @@ export function ChatInput({
 
   return (
     <form
-      className={cn(
-        "flex w-1/2 items-center justify-between rounded-lg border border-tidal-border bg-tidal-card px-[10px] py-[9px] pl-3",
-        className
-      )}
+      className={cn(promptComposerVariants({ surface }), className)}
       onSubmit={(event) => {
         event.preventDefault();
         onSubmit?.();
@@ -113,13 +142,13 @@ export function ChatInput({
             align="end"
             side="top"
             sideOffset={8}
-            className="min-w-[120px] bg-tidal-card border border-tidal-border rounded-[4px]"
+            className="min-w-[120px] rounded-[4px] border border-tidal-border bg-tidal-card"
           >
             {modes.map((option) => (
               <DropdownMenuItem
                 key={option}
                 onClick={() => handleModeChange(option)}
-                className="text-[11px]/[14px] text-tidal-accent cursor-pointer"
+                className="cursor-pointer text-[11px]/[14px] text-tidal-accent"
               >
                 {option}
               </DropdownMenuItem>
@@ -130,7 +159,7 @@ export function ChatInput({
         <button
           type="submit"
           className={cn(
-            "flex h-[30px] w-[30px] items-center justify-center rounded-md bg-tidal-accent",
+            promptComposerSendButtonVariants({ surface }),
             sendButtonClassName
           )}
         >

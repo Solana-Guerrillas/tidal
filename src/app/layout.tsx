@@ -4,8 +4,8 @@ import "./globals.css";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AppSidebar } from "@/components/app-sidebar";
-import { sidebarNavigation } from "@/features/shell/mocks/navigation";
+import { AppSidebar } from "@/features/shell/components/app-sidebar";
+import { sidebarNavigation } from "@/mock-data/shell/mocks/navigation";
 
 const inter = Inter({
   variable: "--font-inter",

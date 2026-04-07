@@ -33,7 +33,7 @@ What currently needs work:
 
 ## Target Shape
 
-The frontend should be structured in three layers:
+The frontend should be structured in four layers:
 
 ### 1. Generic UI primitives
 
@@ -70,9 +70,9 @@ Location:
 
 - `src/components/tidal`
 
-### 3. Feature containers
+### 3. Mock data containers
 
-Feature-specific composition, mocked data wiring, local experimentation state, and view-model shaping.
+Prototype data grouped by product area, plus the lightweight types that describe it.
 
 Examples:
 
@@ -85,6 +85,25 @@ Examples:
 
 Location:
 
+- `src/mock-data/pool`
+- `src/mock-data/swap`
+- `src/mock-data/amplify`
+
+### 4. Feature modules
+
+Product-area-owned UI, screen assembly, and feature-specific composition.
+
+Examples:
+
+- Pool screens and Pool-specific components
+- Swap screens and Swap-specific components
+- Amplify screens and Amplify-specific components
+- Shell-level app frame components
+
+Location:
+
+- `src/features/shell`
+- `src/features/home`
 - `src/features/pool`
 - `src/features/swap`
 - `src/features/amplify`
@@ -98,21 +117,42 @@ src/
     ui/
     tidal/
   features/
+    shell/
+      components/
+      screens/
+      types/
+    home/
+      components/
+      screens/
+      types/
     pool/
       components/
-      mocks/
+      screens/
       types/
-      view-models/
     swap/
       components/
-      mocks/
+      screens/
       types/
-      view-models/
     amplify/
       components/
+      screens/
+      types/
+  mock-data/
+    shell/
       mocks/
       types/
-      view-models/
+    home/
+      mocks/
+      types/
+    pool/
+      mocks/
+      types/
+    swap/
+      mocks/
+      types/
+    amplify/
+      mocks/
+      types/
   hooks/
   lib/
   styles/
@@ -122,7 +162,8 @@ Notes:
 
 - `ui/` stays generic and reusable across any app
 - `tidal/` holds shared branded patterns that represent the design system of this product
-- `features/` owns mocked feature content and screen-level assembly
+- `mock-data/` owns prototype content grouped by product area
+- `features/` owns product-area UI, screens, and feature-specific composition
 - `styles/` can hold future token definitions, component recipes, or layout utilities if needed
 
 ## Component Boundary Rules
@@ -153,7 +194,7 @@ Container components should:
 - assemble screens
 - import mock data
 - hold temporary prototype state
-- translate feature data into presentational props
+- translate mock data into presentational props
 - remain easy to replace later when real integration happens
 
 Examples:
@@ -161,6 +202,21 @@ Examples:
 - home screen container
 - amplify workspace container
 - pool recommendation screen container
+
+### Feature modules
+
+Feature modules should:
+
+- group UI by product area
+- own screen-level composition for that area
+- contain feature-specific components that are not generic enough for `components/tidal`
+- keep product-area responsibilities easy to find
+
+Examples:
+
+- `features/amplify/screens/AmplifyWorkspace`
+- `features/amplify/components/*`
+- `features/shell/components/AppSidebar`
 
 ### Mock data modules
 
@@ -211,11 +267,11 @@ The styling work should focus on systemising the current look rather than redesi
 
 #### Shared product components
 
-- [x] `src/components/chat-input.tsx`
-- [x] `src/components/app-sidebar.tsx`
-- [x] `src/components/amplify/amplify-chat.tsx`
-- [x] `src/components/amplify/strategy-node.tsx`
-- [x] `src/components/amplify/split-node.tsx`
+- [x] `src/components/tidal/prompt-composer.tsx`
+- [x] `src/features/shell/components/app-sidebar.tsx`
+- [x] `src/features/amplify/components/amplify-chat.tsx`
+- [x] `src/features/amplify/components/strategy-node.tsx`
+- [x] `src/features/amplify/components/split-node.tsx`
 
 #### Styling foundation
 
@@ -245,7 +301,7 @@ Stabilise the repo and reduce obvious coupling.
 
 ### Phase 2: Tidal Component Layer
 
-Status: Not started
+Status: Complete
 
 #### Goal
 
@@ -253,34 +309,38 @@ Create a reusable branded design component layer.
 
 #### Tasks
 
-- [ ] add `src/components/tidal`
-- [ ] extract repeated patterns from screens into branded components
-- [ ] unify repeated elements such as composer shells, suggestion rows, panel headers, badges, and message treatments
-- [ ] use `cva` for variants where repeated combinations exist
+- [x] add `src/components/tidal`
+- [x] extract repeated patterns from screens into branded components
+- [x] unify repeated elements such as composer shells, suggestion rows, panel headers, badges, and message treatments
+- [x] use `cva` for variants where repeated combinations exist
 
 #### Deliverables
 
-- [ ] pages compose branded components instead of raw Tailwind blocks
-- [ ] the visual language becomes explicit and reusable
+- [x] pages compose branded components instead of raw Tailwind blocks
+- [x] the visual language becomes explicit and reusable
 
 ### Phase 3: Feature Module Refactor
 
-Status: In progress
+Status: Complete
 
 #### Goal
 
-Move from page-centric implementation to feature-centric composition.
+Move from page-centric implementation to a real product-area feature structure.
 
 #### Tasks
 
-- [ ] create `features/pool`, `features/swap`, and `features/amplify`
-- [ ] move feature-specific components, mocks, and types into those folders
-- [ ] keep `app/` routes very thin
-- [ ] isolate feature view-model shaping from visual rendering
+- [x] create `features/shell`, `features/home`, `features/pool`, `features/swap`, and `features/amplify`
+- [x] move product-specific screens and feature-owned components into those folders
+- [x] keep `mock-data/*` as the separate prototype content layer
+- [x] define clear ownership between `components/tidal` and `features/*/components`
+- [x] keep `app/` routes very thin
+- [x] isolate product-area composition from visual rendering
 
 #### Deliverables
 
-- [ ] feature code is easier to hand off and easier to replace with real integration later
+- [x] each product area has a clear home in the repo
+- [x] another developer can find Pool, Swap, Amplify, Home, and Shell code without hunting across unrelated folders
+- [x] routes mostly render feature screens rather than building UI inline
 
 ### Phase 4: Styling System Cleanup
 
@@ -305,16 +365,21 @@ Turn the current visual direction into a defined system.
 
 ### Suggested Next Moves
 
-- [ ] Introduce `src/components/tidal` and move shared branded patterns there.
-- [ ] Start extracting repeated layout and message patterns from the home and Amplify screens.
-- [ ] Keep thinning `app/` routes so they mostly render feature containers.
-- [ ] Expand the feature structure to cover Pool and Swap explicitly.
+- [x] Introduce `src/components/tidal` and move shared branded patterns there.
+- [x] Start extracting repeated layout and message patterns from the home and Amplify screens.
+- [x] Introduce `src/features/shell`, `src/features/home`, and `src/features/amplify` as the first real feature modules.
+- [x] Move the current home screen and Amplify workspace composition into those feature folders.
+- [x] Move feature-owned components out of `src/components/amplify` into `src/features/amplify/components`.
+- [x] Keep thinning `app/` routes so they mostly render feature screens.
+- [x] Add initial `features/pool` and `features/swap` folders so the repo shape reflects the intended product.
+- [ ] Decide the first real Pool and Swap screens to add under the new feature structure.
 
 ### Success Criteria
 
 - [ ] page files are thin and mostly declarative
 - [ ] mock data is not embedded in UI component files
 - [ ] shared branded components exist for repeated Tidal patterns
+- [ ] product-area UI lives in `features/*` rather than in mixed top-level component folders
 - [ ] styling decisions are encoded in reusable components and variants
 - [ ] another developer can connect real logic without rewriting the visual layer
 - [ ] the repo remains lightweight and prototype-friendly

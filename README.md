@@ -44,4 +44,4 @@ The frontend is being cleaned up so that:
 - business logic and mock data stay separate from visual components
 - shared UI primitives remain generic
 - Tidal-specific design patterns become reusable
-- feature modules are easier to hand off for later integration
+- mock data and composition layers are easier to hand off for later integration
