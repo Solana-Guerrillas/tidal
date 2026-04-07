@@ -2,8 +2,8 @@ import type { SidebarNavigation } from "../types";
 
 export const sidebarNavigation: SidebarNavigation = {
   poolItems: [
-    { title: "My Solana Pool" },
-    { title: "Stablecoin Strategy" },
+    { title: "My Solana Pool", href: "/pool" },
+    { title: "Stablecoin Strategy", href: "/pool" },
   ],
   amplifyItems: [
     { title: "SOL Yield Loop", href: "/amplify" },

@@ -6,6 +6,8 @@ This repo is a prototype frontend for Tidal. It exists to explore product flows,
 
 It is not the production app and should not contain real data integrations, wallet connections, or blockchain execution.
 
+Feature-specific implementation planning can live in dedicated docs alongside this file, such as `docs/codex-pool-plan.md`.
+
 ## Core Constraints
 
 - All data is mocked
@@ -15,7 +17,7 @@ It is not the production app and should not contain real data integrations, wall
 
 ## Current Shape
 
-After Phases 1, 2, and the initial Phase 3 restructure, the repo is organised around five broad layers:
+After the repo-wide cleanup phases and the first full Pool implementation, the repo is organised around five broad layers:
 
 ### 1. App routes
 
@@ -24,6 +26,7 @@ Thin route files in `src/app` assemble screens and pass mocked data into compone
 Current routes:
 
 - `src/app/page.tsx`: home / landing prompt experience
+- `src/app/pool/page.tsx`: Pool workspace prototype
 - `src/app/amplify/page.tsx`: Amplify workspace prototype
 - `src/app/layout.tsx`: shared shell, sidebar provider, tooltip provider
 
@@ -66,12 +69,14 @@ Current feature modules:
 
 - `src/mock-data/shell`
 - `src/mock-data/home`
+- `src/mock-data/pool`
 - `src/mock-data/amplify`
 
 These modules currently provide:
 
 - typed mock navigation data for the shared shell
 - typed mock home screen suggestions
+- typed mock Pool workspace state, threads, panel tabs, positions, recommendations, discovery items, activity, and health data
 - typed mock Amplify chat content and graph data
 
 ### 5. Feature modules
@@ -136,6 +141,33 @@ Current responsibilities:
 
 - home screen content types
 - mocked suggestion content
+
+### Pool
+
+`src/mock-data/pool` currently holds the seeded mock content and types for the Pool workspace prototype.
+
+Current responsibilities:
+
+- Pool workspace typing
+- Pool thread and thread-context typing
+- Pool panel tab typing
+- mocked positions, recommendations, discovery items, and activity
+- mocked pending actions and Pool health state
+- mocked performance chart data
+
+### Pool
+
+`src/features/pool` now owns the first full Pool workspace surface.
+
+Current responsibilities:
+
+- Pool route-level screen composition
+- Pool overview as the default `/pool` landing state
+- Pool workspace header with an overview tab and chat tabs
+- left-side conversation and overview panes
+- right-side tabbed Pool panel with holdings, recommendations, discovery, and activity surfaces
+- shared client-side Pool workspace state used by both the workspace and the sidebar, including active thread, active panel tab, preferences, and pending actions
+- sidebar Pool navigation that treats the Pool as a parent item with its chats nested beneath it
 
 ### Amplify
 
@@ -225,6 +257,14 @@ Rules for future work:
 - keep new screens responsive by default, starting from narrow/mobile layouts and widening deliberately
 - avoid creating a separate `src/styles` layer unless the current `globals.css` approach becomes a proven bottleneck
 - when Pool and Swap screens are added, build them on the same `globals.css` and `components/tidal` system rather than introducing a parallel styling pattern
+
+Pool now uses this semantic styling layer directly for repeated workspace treatments such as:
+
+- tab buttons and workspace tabs
+- primary, secondary, and danger action buttons
+- metric/value readouts and change labels
+- meta pills and static chips
+- contextual panels and subtle inset panels
 
 ### Mock-data modules
 

@@ -1,9 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import {
   ArrowsLeftRight,
+  CaretDown,
   Waves,
   Lightning,
   ChatCircle,
@@ -22,9 +25,14 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { Card, CardContent } from "@/components/ui/card";
+import { usePoolWorkspace } from "@/features/pool/providers/pool-workspace-provider";
+import { cn } from "@/lib/utils";
 import type { SidebarNavigation } from "@/mock-data/shell/types";
 
 type AppSidebarProps = {
@@ -32,6 +40,28 @@ type AppSidebarProps = {
 };
 
 export function AppSidebar({ navigation }: AppSidebarProps) {
+  const pathname = usePathname();
+  const isPoolRoute = pathname.startsWith("/pool");
+  const [isPoolExpanded, setIsPoolExpanded] = useState(true);
+  const {
+    workspace,
+    isOverviewActive,
+    activeThread,
+    showOverview,
+    setActiveThreadId,
+  } = usePoolWorkspace();
+
+  const poolChatItems = workspace.threads.map((thread) => ({
+    title: thread.title,
+    href: "/pool",
+    id: thread.id,
+  }));
+
+  const chatItems = navigation.chatItems.map((item) => ({
+    ...item,
+    id: item.title,
+  }));
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4">
@@ -83,16 +113,52 @@ export function AppSidebar({ navigation }: AppSidebarProps) {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigation.poolItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
+              <SidebarMenuItem>
+                <div className="flex items-center gap-1">
                   <SidebarMenuButton
-                    tooltip={item.title}
-                    className="tidal-sidebar-subitem"
+                    render={<Link href="/pool" />}
+                    tooltip={workspace.name}
+                    className="tidal-sidebar-item flex-1"
+                    isActive={isPoolRoute && isOverviewActive}
+                    onClick={showOverview}
                   >
-                    <span>{item.title}</span>
+                    <span>{workspace.name}</span>
                   </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+
+                  <button
+                    type="button"
+                    aria-label={isPoolExpanded ? "Collapse pool chats" : "Expand pool chats"}
+                    aria-expanded={isPoolExpanded}
+                    onClick={() => setIsPoolExpanded((current) => !current)}
+                    className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-md text-tidal-accent transition-colors hover:bg-tidal-sidebar-active hover:text-foreground"
+                  >
+                    <CaretDown
+                      weight="bold"
+                      className={cn(
+                        "transition-transform",
+                        isPoolExpanded ? "rotate-0" : "-rotate-90"
+                      )}
+                    />
+                  </button>
+                </div>
+
+                {isPoolExpanded ? (
+                  <SidebarMenuSub>
+                    {poolChatItems.map((item) => (
+                      <SidebarMenuSubItem key={item.id}>
+                        <SidebarMenuSubButton
+                          render={<Link href="/pool" />}
+                          isActive={isPoolRoute && item.id === activeThread.id}
+                          onClick={() => setActiveThreadId(item.id)}
+                          className="cursor-pointer text-sidebar-foreground hover:text-foreground data-active:text-tidal-accent"
+                        >
+                          <span>{item.title}</span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    ))}
+                  </SidebarMenuSub>
+                ) : null}
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -130,9 +196,10 @@ export function AppSidebar({ navigation }: AppSidebarProps) {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigation.chatItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
+              {chatItems.map((item) => (
+                <SidebarMenuItem key={item.id}>
                   <SidebarMenuButton
+                    render={<Link href={item.href ?? "/pool"} />}
                     tooltip={item.title}
                     className="tidal-sidebar-subitem"
                   >

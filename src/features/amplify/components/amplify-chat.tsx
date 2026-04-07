@@ -63,6 +63,7 @@ export function AmplifyChat({
           className="w-full"
           mode={mode}
           defaultMode={defaultMode}
+          showModeSelector={false}
           onModeChange={onModeChange}
           value={inputValue}
           onValueChange={onInputValueChange}

@@ -48,6 +48,7 @@ export type PromptComposerProps = {
   inputClassName?: string;
   modeTriggerClassName?: string;
   sendButtonClassName?: string;
+  showModeSelector?: boolean;
   mode?: AppMode;
   defaultMode?: AppMode;
   onModeChange?: (mode: AppMode) => void;
@@ -64,6 +65,7 @@ export function PromptComposer({
   inputClassName,
   modeTriggerClassName,
   sendButtonClassName,
+  showModeSelector = true,
   mode,
   defaultMode = "Chat",
   onModeChange,
@@ -108,54 +110,56 @@ export function PromptComposer({
         onChange={(event) => handleValueChange(event.target.value)}
         placeholder={placeholder}
         className={cn(
-          "tidal-text-body h-auto border-0 bg-transparent p-0 placeholder:text-tidal-placeholder focus-visible:ring-0",
+          "tidal-text-body h-auto border-0 bg-transparent p-0 placeholder:text-tidal-placeholder focus-visible:ring-0 dark:bg-transparent",
           inputClassName
         )}
       />
       <div className="flex shrink-0 items-center gap-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            className={cn(
-              "tidal-compact-control w-[90px] gap-1.5 border-tidal-accent/50",
-              modeTriggerClassName
-            )}
-          >
-            <span className="tidal-text-action">
-              {currentMode}
-            </span>
-            <svg
-              className="text-tidal-accent"
-              width="8"
-              height="5"
-              viewBox="0 0 8 5"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+        {showModeSelector ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className={cn(
+                "tidal-compact-control w-[90px] gap-1.5 border-tidal-accent/50",
+                modeTriggerClassName
+              )}
             >
-              <path
-                d="M1 1L4 4L7 1"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            side="top"
-            sideOffset={8}
-            className="min-w-[120px] rounded-md border border-tidal-border bg-tidal-card"
-          >
-            {modes.map((option) => (
-              <DropdownMenuItem
-                key={option}
-                onClick={() => handleModeChange(option)}
-                className="cursor-pointer tidal-text-action"
+              <span className="tidal-text-action">
+                {currentMode}
+              </span>
+              <svg
+                className="text-tidal-accent"
+                width="8"
+                height="5"
+                viewBox="0 0 8 5"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
               >
-                {option}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+                <path
+                  d="M1 1L4 4L7 1"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              side="top"
+              sideOffset={8}
+              className="min-w-[120px] rounded-md border border-tidal-border bg-tidal-card"
+            >
+              {modes.map((option) => (
+                <DropdownMenuItem
+                  key={option}
+                  onClick={() => handleModeChange(option)}
+                  className="cursor-pointer tidal-text-action"
+                >
+                  {option}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : null}
 
         <button
           type="submit"

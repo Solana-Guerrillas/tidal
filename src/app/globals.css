@@ -188,6 +188,30 @@
     line-height: clamp(2.5rem, 6vw, 3.25rem);
   }
 
+  .tidal-text-feature-title {
+    @apply text-left font-medium text-tidal-accent;
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    line-height: clamp(2.5rem, 5.8vw, 3.75rem);
+  }
+
+  .tidal-text-section-title {
+    @apply text-left font-medium text-tidal-accent;
+    font-size: clamp(1.75rem, 4vw, 2.625rem);
+    line-height: clamp(2.125rem, 4.5vw, 3rem);
+  }
+
+  .tidal-text-thread-title {
+    @apply text-left font-medium text-tidal-accent;
+    font-size: clamp(1.375rem, 2.6vw, 1.75rem);
+    line-height: clamp(1.75rem, 3.2vw, 2.1rem);
+  }
+
+  .tidal-text-workspace-title {
+    @apply font-medium tracking-tight text-tidal-accent;
+    font-size: clamp(1.125rem, 1.8vw, 1.375rem);
+    line-height: 1.1;
+  }
+
   .tidal-text-label {
     @apply text-[11px]/[14px] text-tidal-muted;
   }
@@ -204,8 +228,64 @@
     @apply text-[10px] text-tidal-muted;
   }
 
+  .tidal-stat-value {
+    @apply text-[2rem] font-medium leading-none text-tidal-accent;
+  }
+
+  .tidal-stat-change {
+    @apply text-[11px]/[14px] font-medium text-emerald-400;
+  }
+
+  .tidal-meta-pill {
+    @apply inline-flex items-center rounded-full border border-tidal-border px-3 py-1 text-[10px] text-tidal-muted;
+  }
+
+  .tidal-static-chip {
+    @apply inline-flex cursor-default items-center rounded-md border border-tidal-border px-3 py-1.5 text-[11px]/[14px] text-tidal-muted;
+  }
+
+  .tidal-tab-button {
+    @apply inline-flex cursor-pointer items-center justify-center rounded-md border px-3 py-1.5 text-[11px]/[14px] font-medium transition-colors;
+  }
+
+  .tidal-tab-button-active {
+    @apply border-tidal-accent bg-tidal-accent text-background;
+  }
+
+  .tidal-tab-button-inactive {
+    @apply border-tidal-border bg-tidal-card text-tidal-muted hover:border-tidal-accent/40 hover:text-tidal-accent;
+  }
+
+  .tidal-action-button {
+    @apply inline-flex cursor-pointer items-center justify-center rounded-md border px-3 py-2 text-[11px]/[14px] font-medium transition-colors;
+  }
+
+  .tidal-action-button-primary {
+    @apply border-tidal-accent bg-tidal-accent text-background hover:bg-tidal-accent/90;
+  }
+
+  .tidal-action-button-secondary {
+    @apply border-tidal-border bg-transparent text-tidal-accent hover:border-tidal-accent/40;
+  }
+
+  .tidal-action-button-danger {
+    @apply border-rose-500/40 text-rose-400 hover:border-rose-400/60;
+  }
+
   .tidal-pill-button {
     @apply inline-flex items-center rounded-full border border-tidal-border bg-tidal-card px-4 py-2 text-[11px]/[14px] font-medium text-tidal-accent transition-colors hover:border-tidal-accent/40;
+  }
+
+  .tidal-context-panel {
+    @apply rounded-xl border border-tidal-border bg-tidal-card/70 p-5;
+  }
+
+  .tidal-subtle-panel {
+    @apply rounded-lg border border-tidal-border bg-background/40 p-3;
+  }
+
+  .tidal-chart-frame {
+    @apply rounded-xl border border-tidal-border bg-background/40 p-4;
   }
 
   .tidal-compact-control {

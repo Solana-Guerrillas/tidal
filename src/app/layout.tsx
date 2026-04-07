@@ -4,6 +4,7 @@ import "./globals.css";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { PoolWorkspaceProvider } from "@/features/pool/providers/pool-workspace-provider";
 import { AppSidebar } from "@/features/shell/components/app-sidebar";
 import { sidebarNavigation } from "@/mock-data/shell/mocks/navigation";
 
@@ -26,13 +27,15 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} dark h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <TooltipProvider>
-          <SidebarProvider>
-            <AppSidebar navigation={sidebarNavigation} />
-            <main className="relative flex flex-1 flex-col">
-              <SidebarTrigger className="absolute left-2 top-2 z-10 text-tidal-muted hover:text-tidal-accent" />
-              {children}
-            </main>
-          </SidebarProvider>
+          <PoolWorkspaceProvider>
+            <SidebarProvider>
+              <AppSidebar navigation={sidebarNavigation} />
+              <main className="relative flex flex-1 flex-col">
+                <SidebarTrigger className="absolute left-2 top-2 z-10 text-tidal-muted hover:text-tidal-accent" />
+                {children}
+              </main>
+            </SidebarProvider>
+          </PoolWorkspaceProvider>
         </TooltipProvider>
       </body>
     </html>
