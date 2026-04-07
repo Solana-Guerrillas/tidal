@@ -33,7 +33,7 @@ export function AmplifyChat({
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex min-h-0 flex-1 flex-col justify-end gap-[27px] px-[43px] pb-5">
+      <div className="tidal-panel-padding flex min-h-0 flex-1 flex-col justify-end gap-7 pb-5">
         <div className="flex flex-col gap-2">
           {aiMessages.map((message, index) => (
             <ChatMessage key={`${message.role}-${index}`} role="ai">
@@ -58,7 +58,7 @@ export function AmplifyChat({
         ))}
       </div>
 
-      <div className="flex shrink-0 flex-col items-center gap-3 px-[43px] pt-5">
+      <div className="tidal-panel-padding flex shrink-0 flex-col items-center gap-3 pt-5">
         <PromptComposer
           className="w-full"
           mode={mode}
@@ -70,7 +70,7 @@ export function AmplifyChat({
           surface="pill"
         />
 
-        <span className="text-center text-[11px]/[14px] font-medium text-tidal-placeholder">
+        <span className="tidal-note">
           Tidal will ask for approval before executing any transactions
         </span>
       </div>

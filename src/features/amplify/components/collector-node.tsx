@@ -26,7 +26,7 @@ export const CollectorNode = memo(
 
         <div className="mb-2 flex items-center gap-1.5">
           <Timer weight="bold" className="h-3.5 w-3.5 text-tidal-muted" />
-          <span className="text-[10px] font-semibold text-tidal-muted">
+          <span className="tidal-text-caption font-semibold">
             Fee Collector
           </span>
         </div>
@@ -34,7 +34,7 @@ export const CollectorNode = memo(
         <CompactSelect
           options={collectIntervals}
           value={interval}
-          onChange={setInterval}
+          onChange={(nextInterval) => setInterval(nextInterval)}
         />
       </SurfaceCard>
     );

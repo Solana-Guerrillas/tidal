@@ -28,30 +28,26 @@ export const StrategyNode = memo(
 
         <div className="p-4">
           <div className="mb-3 flex items-center justify-between">
-            <span className="text-xs font-semibold text-tidal-accent">
-              {data.protocol}
-            </span>
+            <span className="tidal-text-eyebrow">{data.protocol}</span>
             <Badge variant="status">Active</Badge>
           </div>
 
-          <div className="mb-3 text-[11px] font-medium text-foreground">
-            {data.action}
-          </div>
+          <div className="mb-3 tidal-text-body">{data.action}</div>
 
-          <div className="mb-3 flex items-center gap-2 text-[10px] text-tidal-muted">
+          <div className="mb-3 flex items-center gap-2 tidal-text-caption">
             <Badge variant="token" size="xs">
               {data.assetIn}
             </Badge>
             <svg
+              className="shrink-0 text-tidal-muted"
               width="12"
               height="8"
               viewBox="0 0 12 8"
               fill="none"
-              className="shrink-0"
             >
               <path
                 d="M1 4h10M8 1l3 3-3 3"
-                stroke="#657F92"
+                stroke="currentColor"
                 strokeWidth="1.2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -70,7 +66,7 @@ export const StrategyNode = memo(
             >
               {data.apy}
             </span>
-            <span className="text-[10px] text-tidal-muted">
+            <span className="tidal-text-caption">
               {data.apyType === "earn" ? "APY" : "Borrow Cost"}
             </span>
           </div>
@@ -80,14 +76,14 @@ export const StrategyNode = memo(
           <div className="border-t border-tidal-border px-4 py-3">
             <div className="mb-2 flex items-center gap-1.5">
               <Timer weight="bold" className="h-3 w-3 text-tidal-muted" />
-              <span className="text-[10px] font-semibold text-tidal-muted">
+              <span className="tidal-text-caption font-semibold">
                 Fee Collector
               </span>
             </div>
             <CompactSelect
               options={collectIntervals}
               value={interval}
-              onChange={setInterval}
+              onChange={(nextInterval) => setInterval(nextInterval)}
             />
           </div>
         )}

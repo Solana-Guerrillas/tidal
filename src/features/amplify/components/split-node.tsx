@@ -17,9 +17,7 @@ export const SplitNode = memo(
           className="h-3! w-3! rounded-full! border-2! border-tidal-accent! bg-tidal-card!"
         />
 
-        <div className="mb-3 text-xs font-semibold text-tidal-accent">
-          Split {data.asset}
-        </div>
+        <div className="mb-3 tidal-text-eyebrow">Split {data.asset}</div>
 
         <div className="mb-3 flex h-3 w-full overflow-hidden rounded-full">
           <div className="bg-tidal-accent" style={{ width: `${data.splitA}%` }} />
@@ -27,14 +25,14 @@ export const SplitNode = memo(
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between text-[10px]">
+          <div className="flex items-center justify-between tidal-text-caption">
             <span className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-tidal-accent" />
               <span className="text-foreground">Path A</span>
             </span>
             <span className="font-semibold text-tidal-accent">{data.splitA}%</span>
           </div>
-          <div className="flex items-center justify-between text-[10px]">
+          <div className="flex items-center justify-between tidal-text-caption">
             <span className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-emerald-400" />
               <span className="text-foreground">Path B</span>

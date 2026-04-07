@@ -77,6 +77,30 @@
   --sidebar-accent-foreground: #61B3CF;
   --sidebar-border: #22292E;
   --sidebar-ring: #61B3CF;
+  --tidal-page-x: 1rem;
+  --tidal-page-y: 1.25rem;
+  --tidal-screen-gap: 1.75rem;
+  --tidal-content-width: 36rem;
+  --tidal-sidebar-width: 35%;
+  --tidal-panel-x: 1rem;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --tidal-page-x: 2.25rem;
+    --tidal-page-y: 1.25rem;
+    --tidal-screen-gap: 2.5rem;
+    --tidal-content-width: 34rem;
+    --tidal-panel-x: 2.25rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --tidal-page-x: 2.6875rem;
+    --tidal-content-width: 30%;
+    --tidal-panel-x: 2.6875rem;
+  }
 }
 
 /* React Flow dark theme overrides */
@@ -93,6 +117,18 @@
   display: none;
 }
 
+.react-flow .tidal-flow-controls {
+  @apply rounded-lg border border-tidal-border bg-tidal-card shadow-lg shadow-black/20;
+}
+
+.react-flow .tidal-flow-controls > button {
+  @apply border-tidal-border bg-tidal-card text-tidal-muted;
+}
+
+.react-flow .tidal-flow-controls > button:hover {
+  @apply bg-tidal-sidebar-active text-tidal-accent;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -102,5 +138,141 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@layer components {
+  .tidal-page {
+    @apply flex min-h-screen w-full flex-col;
+    padding-inline: var(--tidal-page-x);
+    padding-block: var(--tidal-page-y);
+    gap: var(--tidal-screen-gap);
+  }
+
+  .tidal-page-center {
+    @apply items-center justify-center;
+  }
+
+  .tidal-content-column {
+    @apply flex w-full flex-col;
+    max-width: var(--tidal-content-width);
+  }
+
+  .tidal-content-column-wide {
+    max-width: 42rem;
+  }
+
+  .tidal-stack-gap {
+    @apply gap-3;
+  }
+
+  .tidal-panel-padding {
+    padding-inline: var(--tidal-panel-x);
+  }
+
+  .tidal-note {
+    @apply text-center text-[11px]/[14px] font-medium text-tidal-placeholder;
+  }
+
+  .tidal-text-eyebrow {
+    @apply text-xs font-semibold text-tidal-accent;
+  }
+
+  .tidal-text-action {
+    @apply text-[11px]/[14px] font-medium text-tidal-accent;
+  }
+
+  .tidal-text-display {
+    @apply text-center font-medium text-tidal-accent;
+    font-size: clamp(2rem, 5vw, 2.625rem);
+    line-height: clamp(2.5rem, 6vw, 3.25rem);
+  }
+
+  .tidal-text-label {
+    @apply text-[11px]/[14px] text-tidal-muted;
+  }
+
+  .tidal-text-body {
+    @apply text-[13px]/[16px] font-medium text-foreground;
+  }
+
+  .tidal-text-message {
+    @apply text-[13px]/[20px] text-tidal-muted;
+  }
+
+  .tidal-text-caption {
+    @apply text-[10px] text-tidal-muted;
+  }
+
+  .tidal-pill-button {
+    @apply inline-flex items-center rounded-full border border-tidal-border bg-tidal-card px-4 py-2 text-[11px]/[14px] font-medium text-tidal-accent transition-colors hover:border-tidal-accent/40;
+  }
+
+  .tidal-compact-control {
+    @apply flex cursor-pointer items-center justify-between rounded-md border border-tidal-border bg-tidal-sidebar-active px-2 py-1.5 outline-none;
+  }
+
+  .tidal-compact-control-text {
+    @apply text-[10px] font-medium text-foreground;
+  }
+
+  .tidal-overlay-label {
+    @apply rounded bg-tidal-sidebar-active px-2 py-1 text-[10px] font-medium text-tidal-accent shadow-md shadow-black/20;
+  }
+
+  .tidal-sidebar-brand {
+    @apply text-lg font-semibold text-tidal-accent;
+  }
+
+  .tidal-sidebar-primary-action {
+    @apply cursor-pointer bg-tidal-accent font-medium text-background hover:bg-tidal-accent/90 hover:text-background;
+  }
+
+  .tidal-sidebar-group-title {
+    @apply text-[11px]/[14px] font-medium text-tidal-accent;
+  }
+
+  .tidal-sidebar-item {
+    @apply cursor-pointer text-sidebar-foreground transition-colors hover:text-foreground;
+  }
+
+  .tidal-sidebar-subitem {
+    @apply cursor-pointer pl-6 text-sidebar-foreground transition-colors hover:text-foreground;
+  }
+
+  .tidal-user-avatar {
+    @apply flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-tidal-accent;
+  }
+
+  .tidal-workspace {
+    @apply flex min-h-screen w-full flex-col;
+  }
+
+  .tidal-workspace-panel {
+    @apply flex w-full shrink-0 flex-col border-b border-tidal-border py-5;
+    min-height: 24rem;
+  }
+
+  .tidal-workspace-canvas {
+    @apply flex-1;
+    min-height: 50vh;
+  }
+}
+
+@media (min-width: 768px) {
+  @layer components {
+    .tidal-workspace {
+      @apply flex-row;
+    }
+
+    .tidal-workspace-panel {
+      @apply border-r border-b-0;
+      width: var(--tidal-sidebar-width);
+      min-height: auto;
+    }
+
+    .tidal-workspace-canvas {
+      min-height: 0;
+    }
   }
 }

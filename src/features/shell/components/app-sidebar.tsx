@@ -37,7 +37,7 @@ export function AppSidebar({ navigation }: AppSidebarProps) {
       <SidebarHeader className="p-4">
         <Link
           href="/"
-          className="text-lg font-semibold text-tidal-accent group-data-[collapsible=icon]:text-center group-data-[collapsible=icon]:text-sm"
+          className="tidal-sidebar-brand group-data-[collapsible=icon]:text-center group-data-[collapsible=icon]:text-sm"
         >
           <span className="group-data-[collapsible=icon]:hidden">Tidal</span>
           <span className="hidden group-data-[collapsible=icon]:inline">T</span>
@@ -51,7 +51,7 @@ export function AppSidebar({ navigation }: AppSidebarProps) {
               <SidebarMenuButton
                 render={<Link href="/" />}
                 tooltip="New"
-                className="cursor-pointer bg-tidal-accent text-background font-medium hover:bg-tidal-accent/90 hover:text-background"
+                className="tidal-sidebar-primary-action"
               >
                 <Plus weight="bold" />
                 <span>New</span>
@@ -63,7 +63,10 @@ export function AppSidebar({ navigation }: AppSidebarProps) {
         <SidebarGroup>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton tooltip="Tidal Swap">
+              <SidebarMenuButton
+                tooltip="Tidal Swap"
+                className="tidal-sidebar-item"
+              >
                 <ArrowsLeftRight weight="bold" className="text-tidal-accent" />
                 <span className="text-tidal-accent">Tidal Swap</span>
               </SidebarMenuButton>
@@ -74,7 +77,7 @@ export function AppSidebar({ navigation }: AppSidebarProps) {
         <SidebarSeparator />
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-tidal-accent">
+          <SidebarGroupLabel className="tidal-sidebar-group-title">
             <Waves weight="bold" className="mr-2" />
             Tidal Pool
           </SidebarGroupLabel>
@@ -84,7 +87,7 @@ export function AppSidebar({ navigation }: AppSidebarProps) {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     tooltip={item.title}
-                    className="cursor-pointer pl-6"
+                    className="tidal-sidebar-subitem"
                   >
                     <span>{item.title}</span>
                   </SidebarMenuButton>
@@ -97,7 +100,7 @@ export function AppSidebar({ navigation }: AppSidebarProps) {
         <SidebarSeparator />
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-tidal-accent">
+          <SidebarGroupLabel className="tidal-sidebar-group-title">
             <Lightning weight="bold" className="mr-2" />
             Tidal Amplify
           </SidebarGroupLabel>
@@ -108,7 +111,7 @@ export function AppSidebar({ navigation }: AppSidebarProps) {
                   <SidebarMenuButton
                     render={<Link href={item.href ?? "/amplify"} />}
                     tooltip={item.title}
-                    className="cursor-pointer pl-6"
+                    className="tidal-sidebar-subitem"
                   >
                     <span>{item.title}</span>
                   </SidebarMenuButton>
@@ -121,7 +124,7 @@ export function AppSidebar({ navigation }: AppSidebarProps) {
         <SidebarSeparator />
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-tidal-accent">
+          <SidebarGroupLabel className="tidal-sidebar-group-title">
             <ChatCircle weight="bold" className="mr-2" />
             Chats
           </SidebarGroupLabel>
@@ -131,7 +134,7 @@ export function AppSidebar({ navigation }: AppSidebarProps) {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     tooltip={item.title}
-                    className="cursor-pointer pl-6"
+                    className="tidal-sidebar-subitem"
                   >
                     <span>{item.title}</span>
                   </SidebarMenuButton>
@@ -148,16 +151,16 @@ export function AppSidebar({ navigation }: AppSidebarProps) {
           className="bg-tidal-card ring-tidal-border group-data-[collapsible=icon]:hidden"
         >
           <CardContent className="flex items-center gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-tidal-accent">
+            <div className="tidal-user-avatar">
               <User weight="bold" className="h-4 w-4 text-tidal-card" />
             </div>
-            <span className="truncate text-sm font-medium text-sidebar-foreground">
+            <span className="tidal-text-body truncate text-sidebar-foreground">
               {navigation.userName}
             </span>
           </CardContent>
         </Card>
         <div className="hidden group-data-[collapsible=icon]:flex justify-center">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-tidal-accent">
+          <div className="tidal-user-avatar">
             <User weight="bold" className="h-4 w-4 text-tidal-card" />
           </div>
         </div>

@@ -155,7 +155,6 @@ src/
       types/
   hooks/
   lib/
-  styles/
 ```
 
 Notes:
@@ -164,7 +163,7 @@ Notes:
 - `tidal/` holds shared branded patterns that represent the design system of this product
 - `mock-data/` owns prototype content grouped by product area
 - `features/` owns product-area UI, screens, and feature-specific composition
-- `styles/` can hold future token definitions, component recipes, or layout utilities if needed
+- `src/app/globals.css` is the central home for theme tokens, semantic typography, layout helpers, and shared React Flow styling
 
 ## Component Boundary Rules
 
@@ -239,6 +238,7 @@ The styling work should focus on systemising the current look rather than redesi
 
 ### Improve
 
+- keep the styling system centred in `src/app/globals.css`
 - define semantic typography styles
 - define consistent spacing and panel rules
 - define reusable component variants with `cva`
@@ -344,7 +344,7 @@ Move from page-centric implementation to a real product-area feature structure.
 
 ### Phase 4: Styling System Cleanup
 
-Status: Not started
+Status: Complete for current prototype surfaces
 
 #### Goal
 
@@ -352,16 +352,17 @@ Turn the current visual direction into a defined system.
 
 #### Tasks
 
-- [ ] formalise typography classes or reusable recipes
-- [ ] standardise layout shells and panel spacing
-- [ ] reduce arbitrary widths and page-specific measurements where possible
-- [ ] improve mobile and narrow viewport behaviour
-- [ ] document component usage conventions
+- [x] formalise typography classes or reusable recipes
+- [x] standardise layout shells and panel spacing
+- [x] reduce arbitrary widths and page-specific measurements where possible
+- [x] improve mobile and narrow viewport behaviour
+- [x] document component usage conventions
 
 #### Deliverables
 
-- [ ] consistent styling patterns across Pool, Swap, and Amplify
-- [ ] less visual drift as more screens are added
+- [x] consistent styling patterns across Home and Amplify have improved materially
+- [x] a documented styling baseline now exists for future Pool and Swap screens
+- [x] less visual drift as more screens are added
 
 ### Suggested Next Moves
 
@@ -373,16 +374,19 @@ Turn the current visual direction into a defined system.
 - [x] Keep thinning `app/` routes so they mostly render feature screens.
 - [x] Add initial `features/pool` and `features/swap` folders so the repo shape reflects the intended product.
 - [ ] Decide the first real Pool and Swap screens to add under the new feature structure.
+- [x] Continue replacing raw text sizes and page spacing values with the new semantic classes in `globals.css`.
+- [x] Decide the intentional mobile layout behaviour for Amplify.
+- [x] Document the semantic styling conventions now living in `globals.css`.
 
 ### Success Criteria
 
-- [ ] page files are thin and mostly declarative
-- [ ] mock data is not embedded in UI component files
-- [ ] shared branded components exist for repeated Tidal patterns
-- [ ] product-area UI lives in `features/*` rather than in mixed top-level component folders
-- [ ] styling decisions are encoded in reusable components and variants
-- [ ] another developer can connect real logic without rewriting the visual layer
-- [ ] the repo remains lightweight and prototype-friendly
+- [x] page files are thin and mostly declarative
+- [x] mock data is not embedded in UI component files
+- [x] shared branded components exist for repeated Tidal patterns
+- [x] product-area UI lives in `features/*` rather than in mixed top-level component folders
+- [x] styling decisions are encoded in reusable components and variants
+- [x] another developer can connect real logic without rewriting the visual layer
+- [x] the repo remains lightweight and prototype-friendly
 
 ### Non-Goals
 

@@ -18,8 +18,8 @@ const promptComposerVariants = cva(
   {
     variants: {
       surface: {
-        default: "w-1/2 rounded-lg px-[10px] py-[9px] pl-3",
-        pill: "w-full rounded-full px-[17px] py-[9px]",
+        default: "w-full rounded-lg px-3 py-2",
+        pill: "w-full rounded-full px-4 py-2",
       },
     },
     defaultVariants: {
@@ -29,7 +29,7 @@ const promptComposerVariants = cva(
 );
 
 const promptComposerSendButtonVariants = cva(
-  "flex h-[30px] w-[30px] items-center justify-center bg-tidal-accent",
+  "flex h-8 w-8 items-center justify-center bg-tidal-accent",
   {
     variants: {
       surface: {
@@ -108,7 +108,7 @@ export function PromptComposer({
         onChange={(event) => handleValueChange(event.target.value)}
         placeholder={placeholder}
         className={cn(
-          "h-auto border-0 bg-transparent p-0 text-[13px]/[16px] font-medium text-foreground placeholder:text-tidal-placeholder focus-visible:ring-0",
+          "tidal-text-body h-auto border-0 bg-transparent p-0 placeholder:text-tidal-placeholder focus-visible:ring-0",
           inputClassName
         )}
       />
@@ -116,14 +116,15 @@ export function PromptComposer({
         <DropdownMenu>
           <DropdownMenuTrigger
             className={cn(
-              "flex w-[90px] cursor-pointer items-center justify-between gap-1.5 rounded-[4px] border border-tidal-accent/50 px-2 py-1.5 outline-none",
+              "tidal-compact-control w-[90px] gap-1.5 border-tidal-accent/50",
               modeTriggerClassName
             )}
           >
-            <span className="text-[11px]/[14px] font-medium text-tidal-accent">
+            <span className="tidal-text-action">
               {currentMode}
             </span>
             <svg
+              className="text-tidal-accent"
               width="8"
               height="5"
               viewBox="0 0 8 5"
@@ -132,7 +133,7 @@ export function PromptComposer({
             >
               <path
                 d="M1 1L4 4L7 1"
-                stroke="#61B3CF"
+                stroke="currentColor"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
@@ -142,13 +143,13 @@ export function PromptComposer({
             align="end"
             side="top"
             sideOffset={8}
-            className="min-w-[120px] rounded-[4px] border border-tidal-border bg-tidal-card"
+            className="min-w-[120px] rounded-md border border-tidal-border bg-tidal-card"
           >
             {modes.map((option) => (
               <DropdownMenuItem
                 key={option}
                 onClick={() => handleModeChange(option)}
-                className="cursor-pointer text-[11px]/[14px] text-tidal-accent"
+                className="cursor-pointer tidal-text-action"
               >
                 {option}
               </DropdownMenuItem>
@@ -164,12 +165,13 @@ export function PromptComposer({
           )}
         >
           <svg
+            className="text-tidal-card"
             xmlns="http://www.w3.org/2000/svg"
             width="14"
             height="14"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#0F151F"
+            stroke="currentColor"
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"

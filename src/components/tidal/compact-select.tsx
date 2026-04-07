@@ -12,29 +12,33 @@ type CompactSelectProps = {
   className?: string;
   contentClassName?: string;
   itemClassName?: string;
-  options: readonly string[];
-  value: string;
-  onChange: (value: string) => void;
 };
 
-export function CompactSelect({
+type CompactSelectValueProps<T extends string> = {
+  options: readonly T[];
+  value: T;
+  onChange: (value: T) => void;
+};
+
+export function CompactSelect<T extends string>({
   className,
   contentClassName,
   itemClassName,
   options,
   value,
   onChange,
-}: CompactSelectProps) {
+}: CompactSelectProps & CompactSelectValueProps<T>) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         className={cn(
-          "nodrag flex w-full cursor-pointer items-center justify-between rounded-[4px] border border-tidal-border bg-tidal-sidebar-active px-2 py-1.5 outline-none",
+          "tidal-compact-control nodrag w-full",
           className
         )}
       >
-        <span className="text-[10px] font-medium text-foreground">{value}</span>
+        <span className="tidal-compact-control-text">{value}</span>
         <svg
+          className="text-tidal-muted"
           width="7"
           height="4"
           viewBox="0 0 8 5"
@@ -43,7 +47,7 @@ export function CompactSelect({
         >
           <path
             d="M1 1L4 4L7 1"
-            stroke="#657F92"
+            stroke="currentColor"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
@@ -54,7 +58,7 @@ export function CompactSelect({
         side="bottom"
         sideOffset={4}
         className={cn(
-          "min-w-[120px] rounded-[4px] border border-tidal-border bg-tidal-card",
+          "min-w-[120px] rounded-md border border-tidal-border bg-tidal-card",
           contentClassName
         )}
       >
@@ -62,7 +66,10 @@ export function CompactSelect({
           <DropdownMenuItem
             key={option}
             onClick={() => onChange(option)}
-            className={cn("cursor-pointer text-[10px] text-tidal-accent", itemClassName)}
+            className={cn(
+              "cursor-pointer tidal-text-caption text-tidal-accent",
+              itemClassName
+            )}
           >
             {option}
           </DropdownMenuItem>

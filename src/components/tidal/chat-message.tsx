@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils";
 const chatMessageVariants = cva("", {
   variants: {
     role: {
-      ai: "text-[13px]/[20px] text-tidal-muted",
-      user: "rounded-[10px] border border-tidal-border bg-tidal-card p-5 text-[13px]/[20px] font-medium text-tidal-muted",
+      ai: "tidal-text-message",
+      user: "tidal-text-message rounded-[10px] border border-tidal-border bg-tidal-card p-5 font-medium",
     },
   },
   defaultVariants: {

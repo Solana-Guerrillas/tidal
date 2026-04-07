@@ -8,7 +8,7 @@ type SectionLabelProps = {
 export function SectionLabel({ className, children }: SectionLabelProps) {
   return (
     <span
-      className={cn("text-[11px]/[14px] text-tidal-muted", className)}
+      className={cn("tidal-text-label", className)}
     >
       {children}
     </span>

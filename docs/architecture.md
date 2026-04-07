@@ -100,6 +100,10 @@ Current:
 
 `mock-data/*/mocks` -> `features/*/screens` -> `features/*/components` and `components/tidal`
 
+Styling system:
+
+`src/app/globals.css` -> semantic typography/layout classes -> `components/tidal` and `features/*`
+
 That means:
 
 - mock content should not live directly inside UI component files
@@ -164,6 +168,7 @@ Files under `src/components/tidal` should:
 - encode reusable branded interface patterns
 - compose generic UI primitives
 - accept data and state via props
+- prefer semantic classes from `src/app/globals.css` before introducing new one-off values
 - avoid owning feature-specific mock content
 
 These components now cover:
@@ -193,6 +198,33 @@ Files under `src/features/*` should:
 - contain feature-specific components that do not belong in `components/tidal`
 - keep the route layer thin
 - stay separate from the `mock-data` layer
+- keep raw visual values light, and promote repeated styling into `components/tidal` or `src/app/globals.css`
+
+## Styling Conventions
+
+The styling system now lives in `src/app/globals.css`.
+
+That file should own:
+
+- theme tokens and brand colours
+- semantic typography classes
+- shared layout and spacing helpers
+- small shared interaction treatments
+- React Flow theme overrides used across the Amplify workspace
+
+The styling split should be:
+
+- `src/app/globals.css`: design tokens and semantic utility classes such as `tidal-text-*`, `tidal-page`, `tidal-workspace`, and sidebar helpers
+- `src/components/tidal`: reusable branded components and variants built on those semantic classes
+- `src/features/*`: screen composition and light feature-specific layout only
+
+Rules for future work:
+
+- prefer semantic classes from `globals.css` over introducing new arbitrary `text-[...]`, `px-[...]`, and `gap-[...]` values
+- if the same visual treatment appears in more than one place, move it into `components/tidal` or a shared semantic class
+- keep new screens responsive by default, starting from narrow/mobile layouts and widening deliberately
+- avoid creating a separate `src/styles` layer unless the current `globals.css` approach becomes a proven bottleneck
+- when Pool and Swap screens are added, build them on the same `globals.css` and `components/tidal` system rather than introducing a parallel styling pattern
 
 ### Mock-data modules
 
@@ -220,6 +252,8 @@ The architecture is expected to move further in this direction as `docs/codex-pl
 - continue expanding `src/components/tidal` for reusable branded product components
 - introduce `src/features` as the product-area structure for Shell, Pool, Swap, and Amplify
 - expand `src/mock-data` to include clearer Pool and Swap mock content
+- continue centralising semantic typography and layout rules in `src/app/globals.css`
+- continue replacing raw feature-level styling values with semantic classes from `globals.css`
 - keep `src/app` route files thin
 - continue reducing screen-specific Tailwind duplication
 

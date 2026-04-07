@@ -6,18 +6,18 @@ import { homeScreenContent } from "@/mock-data/home/mocks/home-screen";
 
 export function HomeScreen() {
   return (
-    <div className="flex h-screen w-full flex-col items-center justify-center gap-[39px] px-[43px] py-5">
-      <div className="absolute right-6 top-6">
+    <div className="tidal-page tidal-page-center">
+      <div className="absolute right-4 top-4 md:right-6 md:top-6">
         <WorkspaceButton>Create investment workspace</WorkspaceButton>
       </div>
 
-      <h1 className="text-center text-[42px]/[52px] font-medium text-tidal-accent">
+      <h1 className="tidal-text-display">
         How can I help today?
       </h1>
 
-      <PromptComposer />
+      <PromptComposer className="tidal-content-column tidal-content-column-wide" />
 
-      <div className="flex w-[30%] flex-col gap-3">
+      <div className="tidal-content-column tidal-stack-gap">
         <SectionLabel>Suggestions</SectionLabel>
         <div className="flex flex-col gap-2">
           {homeScreenContent.suggestions.map((suggestion) => (

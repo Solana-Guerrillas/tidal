@@ -59,7 +59,7 @@ function AssetEdge({
             transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
             pointerEvents: "all",
           }}
-          className="nodrag nopan rounded bg-tidal-sidebar-active px-2 py-1 text-[10px] font-medium text-tidal-accent shadow-md shadow-black/20"
+          className="nodrag nopan tidal-overlay-label"
         >
           {data?.asset}
         </div>
@@ -125,15 +125,15 @@ export function AmplifyWorkspace() {
   );
 
   return (
-    <div className="flex h-screen w-full">
-      <div className="flex w-[35%] shrink-0 flex-col border-r border-tidal-border py-5">
+    <div className="tidal-workspace">
+      <div className="tidal-workspace-panel">
         <AmplifyChat
           messages={amplifyMessages}
           suggestions={amplifySuggestions}
         />
       </div>
 
-      <div className="flex-1">
+      <div className="tidal-workspace-canvas">
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -147,7 +147,7 @@ export function AmplifyWorkspace() {
           fitViewOptions={{ padding: 0.2 }}
           colorMode="dark"
         >
-          <Controls className="rounded-lg! border! border-tidal-border! bg-tidal-card! shadow-lg! shadow-black/20! [&>button]:border-tidal-border! [&>button]:bg-tidal-card! [&>button]:text-tidal-muted! [&>button:hover]:bg-tidal-sidebar-active! [&>button:hover]:text-tidal-accent!" />
+          <Controls className="tidal-flow-controls" />
           <Background
             variant={BackgroundVariant.Dots}
             gap={20}
