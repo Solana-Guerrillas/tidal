@@ -51,7 +51,6 @@ export function PoolConversationPane({
           <PromptComposer
             className="w-full"
             defaultMode="Pool"
-            showModeSelector={false}
           />
         </div>
       </div>

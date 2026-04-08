@@ -16,8 +16,6 @@ export function PoolScreen() {
     recentThreads,
     showOverview,
     setActivePanelTab,
-    toggleRiskOption,
-    toggleInterestOption,
     queuePendingAction,
     setActiveThreadId,
     createBlankThread,
@@ -25,7 +23,7 @@ export function PoolScreen() {
   } = usePoolWorkspace();
 
   return (
-    <div className="flex h-screen w-full flex-col overflow-hidden bg-background">
+    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-background">
       <PoolWorkspaceHeader
         poolName={workspace.name}
         threads={workspace.threads}
@@ -41,11 +39,7 @@ export function PoolScreen() {
           <PoolOverviewPane
             poolName={workspace.name}
             overviewPrompt={workspace.overviewPrompt}
-            riskOptions={workspace.riskOptions}
-            interestOptions={workspace.interestOptions}
             recentThreads={recentThreads}
-            onRiskToggle={toggleRiskOption}
-            onInterestToggle={toggleInterestOption}
             onThreadSelect={setActiveThreadId}
             onNewChat={createBlankThread}
           />

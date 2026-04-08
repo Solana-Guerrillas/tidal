@@ -143,7 +143,7 @@
 
 @layer components {
   .tidal-page {
-    @apply flex min-h-screen w-full flex-col;
+    @apply flex min-h-full w-full flex-col;
     padding-inline: var(--tidal-page-x);
     padding-block: var(--tidal-page-y);
     gap: var(--tidal-screen-gap);
@@ -296,6 +296,14 @@
     @apply text-[10px] font-medium text-foreground;
   }
 
+  .tidal-shell-chip {
+    @apply inline-flex h-8 items-center rounded-lg border border-tidal-border bg-tidal-card/70 px-3 text-[11px] font-medium text-tidal-accent transition-colors;
+  }
+
+  .tidal-shell-chip-muted {
+    @apply text-tidal-muted;
+  }
+
   .tidal-overlay-label {
     @apply rounded bg-tidal-sidebar-active px-2 py-1 text-[10px] font-medium text-tidal-accent shadow-md shadow-black/20;
   }
@@ -325,7 +333,7 @@
   }
 
   .tidal-workspace {
-    @apply flex min-h-screen w-full flex-col;
+    @apply flex h-full min-h-0 w-full flex-col;
   }
 
   .tidal-workspace-panel {

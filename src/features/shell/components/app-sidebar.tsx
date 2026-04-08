@@ -12,6 +12,7 @@ import {
   ChatCircle,
   Plus,
   User,
+  LinkSimple,
 } from "@phosphor-icons/react";
 
 import {
@@ -31,6 +32,12 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useGlobalChatWorkspace } from "@/features/home/providers/global-chat-workspace-provider";
 import { usePoolWorkspace } from "@/features/pool/providers/pool-workspace-provider";
 import { cn } from "@/lib/utils";
 import type { SidebarNavigation } from "@/mock-data/shell/types";
@@ -43,6 +50,7 @@ export function AppSidebar({ navigation }: AppSidebarProps) {
   const pathname = usePathname();
   const isPoolRoute = pathname.startsWith("/pool");
   const [isPoolExpanded, setIsPoolExpanded] = useState(true);
+  const { activeChat, chats, setActiveChatId } = useGlobalChatWorkspace();
   const {
     workspace,
     isOverviewActive,
@@ -57,22 +65,17 @@ export function AppSidebar({ navigation }: AppSidebarProps) {
     id: thread.id,
   }));
 
-  const chatItems = navigation.chatItems.map((item) => ({
-    ...item,
-    id: item.title,
+  const globalChats = chats.map((chat) => ({
+    ...chat,
+    href: chat.href ?? "/",
   }));
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader className="p-4">
-        <Link
-          href="/"
-          className="tidal-sidebar-brand group-data-[collapsible=icon]:text-center group-data-[collapsible=icon]:text-sm"
-        >
-          <span className="group-data-[collapsible=icon]:hidden">Tidal</span>
-          <span className="hidden group-data-[collapsible=icon]:inline">T</span>
-        </Link>
-      </SidebarHeader>
+    <Sidebar
+      collapsible="offcanvas"
+      className="top-14 h-[calc(100svh-3.5rem)] border-t border-tidal-border"
+    >
+      <SidebarHeader className="h-3 p-0" />
 
       <SidebarContent>
         <SidebarGroup>
@@ -82,6 +85,8 @@ export function AppSidebar({ navigation }: AppSidebarProps) {
                 render={<Link href="/" />}
                 tooltip="New"
                 className="tidal-sidebar-primary-action"
+                isActive={pathname === "/"}
+                onClick={() => setActiveChatId("global-chat-new")}
               >
                 <Plus weight="bold" />
                 <span>New</span>
@@ -195,16 +200,59 @@ export function AppSidebar({ navigation }: AppSidebarProps) {
             Chats
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {chatItems.map((item) => (
-                <SidebarMenuItem key={item.id}>
-                  <SidebarMenuButton
-                    render={<Link href={item.href ?? "/pool"} />}
-                    tooltip={item.title}
-                    className="tidal-sidebar-subitem"
-                  >
-                    <span>{item.title}</span>
-                  </SidebarMenuButton>
+            <SidebarMenu className="gap-2">
+              {globalChats.map((chat) => (
+                <SidebarMenuItem key={chat.id}>
+                  <div className="flex items-center gap-1 group-data-[collapsible=icon]:hidden">
+                    <SidebarMenuButton
+                      render={<Link href={chat.href} />}
+                      tooltip={chat.preview}
+                      className="tidal-sidebar-subitem flex-1"
+                      isActive={pathname === chat.href && chat.id === activeChat.id}
+                      onClick={() => setActiveChatId(chat.id)}
+                    >
+                      <span>{chat.title}</span>
+                    </SidebarMenuButton>
+
+                    {chat.links.length > 0 ? (
+                      <Tooltip>
+                        <TooltipTrigger className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-tidal-muted transition-colors hover:bg-tidal-sidebar-active hover:text-tidal-accent">
+                          <LinkSimple weight="bold" className="h-3.5 w-3.5" />
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="right"
+                          align="start"
+                          className="max-w-[18rem] flex-col items-start gap-2 rounded-lg border border-tidal-border bg-tidal-card px-3 py-2 text-tidal-card-foreground"
+                        >
+                          <p className="text-[11px] font-medium uppercase tracking-[0.04em] text-tidal-muted">
+                            Linked context
+                          </p>
+                          <div className="flex flex-col gap-1">
+                            {chat.links.map((link) => (
+                              <span
+                                key={link.id}
+                                className="text-xs leading-tight text-foreground"
+                              >
+                                {link.label}
+                              </span>
+                            ))}
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    ) : null}
+                  </div>
+
+                  <div className="hidden group-data-[collapsible=icon]:block">
+                    <SidebarMenuButton
+                      render={<Link href={chat.href} />}
+                      tooltip={chat.title}
+                      className="tidal-sidebar-subitem"
+                      isActive={pathname === chat.href && chat.id === activeChat.id}
+                      onClick={() => setActiveChatId(chat.id)}
+                    >
+                      <span>{chat.title}</span>
+                    </SidebarMenuButton>
+                  </div>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>

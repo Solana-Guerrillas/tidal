@@ -12,7 +12,6 @@ type AmplifyChatProps = {
   suggestions: string[];
   mode?: AppMode;
   defaultMode?: AppMode;
-  onModeChange?: (mode: AppMode) => void;
   inputValue?: string;
   onInputValueChange?: (value: string) => void;
   onSubmit?: () => void;
@@ -23,7 +22,6 @@ export function AmplifyChat({
   suggestions,
   mode,
   defaultMode = "Amplify",
-  onModeChange,
   inputValue,
   onInputValueChange,
   onSubmit,
@@ -56,6 +54,7 @@ export function AmplifyChat({
             {message.content}
           </ChatMessage>
         ))}
+
       </div>
 
       <div className="tidal-panel-padding flex shrink-0 flex-col items-center gap-3 pt-5">
@@ -63,8 +62,6 @@ export function AmplifyChat({
           className="w-full"
           mode={mode}
           defaultMode={defaultMode}
-          showModeSelector={false}
-          onModeChange={onModeChange}
           value={inputValue}
           onValueChange={onInputValueChange}
           onSubmit={onSubmit}

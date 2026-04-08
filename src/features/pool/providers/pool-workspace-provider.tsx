@@ -9,12 +9,11 @@ import {
   type ReactNode,
 } from "react";
 
+import { usePreferenceProfile } from "@/features/shell/providers/preference-profile-provider";
 import { poolWorkspace } from "@/mock-data/pool/mocks/workspace";
 import type {
-  PoolInterestOption,
   PoolPanelTab,
   PendingPoolAction,
-  PoolRiskOption,
   PoolThread,
   PoolThreadContext,
   PoolWorkspace,
@@ -36,8 +35,6 @@ type PoolWorkspaceContextValue = {
   recentThreads: PoolThread[];
   showOverview: () => void;
   setActivePanelTab: (tab: PoolPanelTab) => void;
-  toggleRiskOption: (label: string) => void;
-  toggleInterestOption: (label: string) => void;
   queuePendingAction: (action: PendingPoolAction) => void;
   setActiveThreadId: (threadId: string) => void;
   createBlankThread: () => void;
@@ -59,14 +56,9 @@ export function PoolWorkspaceProvider({
 }: {
   children: ReactNode;
 }) {
+  const { profile } = usePreferenceProfile();
   const [threads, setThreads] = useState<PoolThread[]>(() =>
     poolWorkspace.threads.map(cloneThread)
-  );
-  const [riskOptions, setRiskOptions] = useState<PoolRiskOption[]>(() =>
-    poolWorkspace.riskOptions.map((option) => ({ ...option }))
-  );
-  const [interestOptions, setInterestOptions] = useState<PoolInterestOption[]>(() =>
-    poolWorkspace.interestOptions.map((option) => ({ ...option }))
   );
   const [pendingActions, setPendingActions] = useState<PendingPoolAction[]>(() =>
     poolWorkspace.pendingActions.map((action) => ({ ...action }))
@@ -87,26 +79,6 @@ export function PoolWorkspaceProvider({
   const setActiveThreadId = useCallback((threadId: string) => {
     setActiveThreadIdState(threadId);
     setIsOverviewActive(false);
-  }, []);
-
-  const toggleRiskOption = useCallback((label: string) => {
-    setRiskOptions((currentOptions) =>
-      currentOptions.map((option) =>
-        option.label === label
-          ? { ...option, checked: true }
-          : { ...option, checked: false }
-      )
-    );
-  }, []);
-
-  const toggleInterestOption = useCallback((label: string) => {
-    setInterestOptions((currentOptions) =>
-      currentOptions.map((option) =>
-        option.label === label
-          ? { ...option, checked: !option.checked }
-          : option
-      )
-    );
   }, []);
 
   const queuePendingAction = useCallback((action: PendingPoolAction) => {
@@ -199,12 +171,12 @@ export function PoolWorkspaceProvider({
     () => ({
       ...poolWorkspace,
       threads,
-      riskOptions,
-      interestOptions,
+      riskOptions: profile.riskOptions,
+      interestOptions: profile.interestOptions,
       pendingActions,
       activeThreadId,
     }),
-    [threads, riskOptions, interestOptions, pendingActions, activeThreadId]
+    [threads, profile.interestOptions, profile.riskOptions, pendingActions, activeThreadId]
   );
 
   const activeThread =
@@ -222,8 +194,6 @@ export function PoolWorkspaceProvider({
       recentThreads,
       showOverview,
       setActivePanelTab,
-      toggleRiskOption,
-      toggleInterestOption,
       queuePendingAction,
       setActiveThreadId,
       createBlankThread,
@@ -238,8 +208,6 @@ export function PoolWorkspaceProvider({
       recentThreads,
       showOverview,
       setActivePanelTab,
-      toggleRiskOption,
-      toggleInterestOption,
       queuePendingAction,
       setActiveThreadId,
       createBlankThread,

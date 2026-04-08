@@ -373,6 +373,11 @@ Turn the current visual direction into a defined system.
 - [x] Move feature-owned components out of `src/components/amplify` into `src/features/amplify/components`.
 - [x] Keep thinning `app/` routes so they mostly render feature screens.
 - [x] Add initial `features/pool` and `features/swap` folders so the repo shape reflects the intended product.
+- [x] Seed the shared shell mock-data layer with hybrid chat foundations for global chats, links, mention targets, promoted workspace threads, and global preference state.
+- [x] Turn Home into a real global chat workspace and wire the shared sidebar to active global chat state and linked-context metadata.
+- [x] Extend the shared global chat flow with a mention-aware composer and route-backed chat updates that resolve `@` selections into structured links.
+- [x] Lift risk appetite and investment interests into a shared preference-profile provider and reusable context panel used across Home, Pool, and Amplify.
+- [x] Add inline AI recommendation cards that steer general chat into Pool or Amplify context without silently creating dedicated threads.
 - [ ] Decide the first real Pool and Swap screens to add under the new feature structure.
 - [x] Continue replacing raw text sizes and page spacing values with the new semantic classes in `globals.css`.
 - [x] Decide the intentional mobile layout behaviour for Amplify.

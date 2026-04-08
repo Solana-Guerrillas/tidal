@@ -1,3 +1,9 @@
+import type {
+  InvestmentInterestLabel,
+  PreferenceOption,
+  RiskAppetiteLabel,
+} from "@/mock-data/shell/types";
+
 export const poolPanelTabs = [
   "My Pool",
   "Recommendations",
@@ -29,15 +35,9 @@ export type PoolThread = {
   context?: PoolThreadContext;
 };
 
-export type PoolRiskOption = {
-  label: string;
-  checked: boolean;
-};
+export type PoolRiskOption = PreferenceOption<RiskAppetiteLabel>;
 
-export type PoolInterestOption = {
-  label: string;
-  checked: boolean;
-};
+export type PoolInterestOption = PreferenceOption<InvestmentInterestLabel>;
 
 export type PoolPosition = {
   id: string;
