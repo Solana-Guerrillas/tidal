@@ -25,10 +25,11 @@ Thin route files in `src/app` assemble screens and pass mocked data into compone
 
 Current routes:
 
-- `src/app/page.tsx`: home / landing prompt experience
+- `src/app/page.tsx`: Home global chat workspace
+- `src/app/chat/[chatId]/page.tsx`: route-backed global chat workspace for persisted chat URLs
 - `src/app/pool/page.tsx`: Pool workspace prototype
 - `src/app/amplify/page.tsx`: Amplify workspace prototype
-- `src/app/layout.tsx`: shared shell, sidebar provider, tooltip provider
+- `src/app/layout.tsx`: shared shell with a global top header above the sidebar/content row, plus preference-profile provider, global chat provider, Pool provider, sidebar provider, and tooltip provider
 
 ### 2. Shared UI components
 
@@ -53,9 +54,13 @@ These components encode recurring Tidal interface patterns without owning featur
 Current examples:
 
 - `PromptComposer`
+- `PreferenceContextPanel`
 - `SuggestionAction`
 - `SectionLabel`
 - `ChatMessage`
+- `ThreadOwnershipBanner`
+- `PromotionSummaryPanel`
+- `WorkspacePromotionCard`
 - `WorkspaceButton`
 - `SurfaceCard`
 - `Badge`
@@ -75,6 +80,7 @@ Current feature modules:
 These modules currently provide:
 
 - typed mock navigation data for the shared shell
+- typed hybrid chat foundations for global chats, chat links, mention targets, promoted workspace thread seeds, and shared preferences
 - typed mock home screen suggestions
 - typed mock Pool workspace state, threads, panel tabs, positions, recommendations, discovery items, activity, and health data
 - typed mock Amplify chat content and graph data
@@ -118,6 +124,7 @@ That means:
 Examples in the current repo:
 
 - sidebar navigation is sourced from `src/mock-data/shell/mocks/navigation.ts`
+- hybrid chat foundations are sourced from `src/mock-data/shell/mocks/hybrid-chat.ts`
 - home suggestions are sourced from `src/mock-data/home/mocks/home-screen.ts`
 - Amplify messages, suggestions, nodes, and edges are sourced from `src/mock-data/amplify/mocks/workspace.ts`
 
@@ -132,15 +139,35 @@ Current responsibilities:
 - app mode types
 - sidebar navigation types
 - mocked sidebar navigation content
+- global chat, chat-link, mention-target, preference-profile, and workspace-thread typing for the hybrid chat-first model
+- mocked global chats, mention targets, promoted workspace thread seeds, and shared preference state
 
 ### Home
 
-`src/mock-data/home` currently holds the mocked content for the landing prompt screen.
+`src/mock-data/home` currently holds the mocked content for the Home global chat surface.
 
 Current responsibilities:
 
 - home screen content types
 - mocked suggestion content
+
+`src/features/home` now owns the global chat-first surface used on `/`.
+
+Current responsibilities:
+
+- client-side global chat workspace state shared by Home and the sidebar
+- route-backed active general-chat selection and recent-chat derivation
+- Home screen composition for the active global chat
+- linked-context rendering for referenced Pools, Amplify workspaces, and nested items
+- mention-aware composer state and `@` target selection for Pools, Amplify workspaces, and nested items
+- chat submission flow that turns selected mentions into structured `ChatLink` entries on the active global chat
+- heuristic inline recommendation cards that suggest creating or opening Pool and Amplify workspaces inside the chat stream
+- create/open recommendation actions that add linked workspace context without creating dedicated threads
+- explicit promotion controls that turn a general chat with Pool context into a dedicated Pool thread
+- explicit promotion controls that turn a general chat with Amplify context into a dedicated Amplify thread
+- shared ownership banners on general chats and summary-seed panels on promoted workspace threads
+- reusable preference context panel rendering behind the shared global header dialog
+- chat-level suggestion and metadata panels around the shared composer
 
 ### Pool
 
@@ -166,19 +193,34 @@ Current responsibilities:
 - Pool workspace header with an overview tab and chat tabs
 - left-side conversation and overview panes
 - right-side tabbed Pool panel with holdings, recommendations, discovery, and activity surfaces
-- shared client-side Pool workspace state used by both the workspace and the sidebar, including active thread, active panel tab, preferences, and pending actions
-- sidebar Pool navigation that treats the Pool as a parent item with its chats nested beneath it
+- shared client-side Pool workspace state used by both the workspace and the sidebar, including active thread, active panel tab, and pending actions
+- promoted Pool thread creation from the global chat system, including source metadata and summary-seeded context
+- shared global preference panel mounted on both Pool overview and focused Pool thread surfaces
+- sidebar Pool navigation that treats the Pool as a named workspace section with an overview item and flat thread items beneath it
 
-### Amplify
+### Amplify Feature
+
+`src/features/amplify` continues to own the strategy workspace and chat surface.
+
+Current responsibilities:
+
+- Amplify route-level workspace composition
+- strategy graph and thread-capable chat layout
+- promoted Amplify thread creation from the global chat system, including source metadata and summary-seeded context
+- sidebar Amplify navigation that treats each strategy workspace as its own section, each with an overview item, while the primary workspace also lists flat thread items
+- shared global preference panel mounted on the Amplify chat surface
+
+### Amplify Mock Data
 
 `src/mock-data/amplify` currently holds the mock content and types for the Amplify prototype.
 
 Current responsibilities:
 
 - chat message typing
+- Amplify workspace and thread typing
 - strategy node typing
 - split node typing
-- mocked chat content
+- mocked Amplify workspace and thread content
 - mocked React Flow nodes and edges
 
 ## Component Boundary Rules
@@ -208,6 +250,7 @@ These components now cover:
 - prompt/composer styling
 - suggestion row and chip styling
 - chat message treatments
+- ownership banners for general chat and promotion summary panels for promoted workspace threads
 - small workspace actions
 - node/panel shells
 - small badges and pills
