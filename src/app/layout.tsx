@@ -39,7 +39,7 @@ export default function RootLayout({
                     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
                       <AppHeader navigation={sidebarNavigation} />
                       <div className="flex min-h-0 flex-1 overflow-hidden">
-                        <AppSidebar navigation={sidebarNavigation} />
+                        <AppSidebar />
                         <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
                           {children}
                         </main>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { Lightning } from "@phosphor-icons/react";
 
 import { ChatMessage } from "@/components/tidal/chat-message";
 import { CreateWorkspaceRecommendationCard } from "@/components/tidal/create-workspace-action-card";
@@ -13,6 +14,7 @@ import { usePoolWorkspace } from "@/features/pool/providers/pool-workspace-provi
 import { homeScreenContent } from "@/mock-data/home/mocks/home-screen";
 import { useAmplifyWorkspace } from "@/features/amplify/providers/amplify-workspace-provider";
 import { WorkspacePromotionCard } from "@/components/tidal/workspace-promotion-card";
+import { WorkspaceButton } from "@/components/tidal/workspace-button";
 
 export function HomeScreen() {
   const router = useRouter();
@@ -27,6 +29,7 @@ export function HomeScreen() {
   const {
     getPromotedThreadBySourceChatId: getPromotedAmplifyThreadBySourceChatId,
     promoteGlobalChatToThread: promoteGlobalChatToAmplifyThread,
+    createWorkspace: createAmplifyWorkspace,
   } = useAmplifyWorkspace();
   const isEmptyChat = activeChat.messages.length === 0;
   const orderedMessages = [...activeChat.messages].reverse();
@@ -40,13 +43,16 @@ export function HomeScreen() {
   const latestUserMessage = [...activeChat.messages]
     .reverse()
     .find((message) => message.role === "user" && message.content)?.content;
+  const handleCreateAmplify = () => {
+    createAmplifyWorkspace();
+    router.push("/amplify");
+  };
 
   if (isEmptyChat) {
     return (
       <div className="tidal-page tidal-page-center">
         <div className="tidal-content-column tidal-content-column-wide tidal-stack-gap">
-          <div className="space-y-3 text-center">
-            <SectionLabel>Global chat</SectionLabel>
+          <div className="space-y-2 text-center">
             <h1 className="tidal-text-display">What can I help you explore?</h1>
             <p className="mx-auto max-w-2xl tidal-text-message">
               Start broad, ask about Solana opportunities, or describe the Pool
@@ -54,14 +60,26 @@ export function HomeScreen() {
             </p>
           </div>
 
-          <PromptComposer
-            className="tidal-content-column tidal-content-column-wide"
-            mentionTargets={mentionTargets}
-            showMentions
-            onSubmit={submitMessage}
-          />
+          <div className="pt-6">
+            <PromptComposer
+              className="tidal-content-column tidal-content-column-wide"
+              mentionTargets={mentionTargets}
+              showMentions
+              onSubmit={submitMessage}
+            />
+          </div>
 
-          <div className="space-y-3">
+          <div className="flex justify-center pt-2">
+            <WorkspaceButton
+              className="gap-2"
+              onClick={handleCreateAmplify}
+            >
+              <Lightning weight="bold" className="h-3.5 w-3.5" />
+              <span>Create new Amplify</span>
+            </WorkspaceButton>
+          </div>
+
+          <div className="mx-auto w-full max-w-3xl space-y-3 pt-5 md:w-3/4">
             <SectionLabel>Suggestions</SectionLabel>
             <div className="flex flex-col gap-2">
               {homeScreenContent.suggestions.map((suggestion) => (
@@ -118,6 +136,7 @@ export function HomeScreen() {
                   latestUserMessage,
                   promotedFromLinkIds: amplifyLinks.map((link) => link.id),
                   promotedLinkLabels: amplifyLinks.map((link) => link.label),
+                  targetWorkspaceId: amplifyLinks[0]?.workspaceId,
                 });
                 router.push("/amplify");
               }}

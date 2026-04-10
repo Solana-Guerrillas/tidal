@@ -126,7 +126,7 @@ Examples in the current repo:
 - sidebar navigation is sourced from `src/mock-data/shell/mocks/navigation.ts`
 - hybrid chat foundations are sourced from `src/mock-data/shell/mocks/hybrid-chat.ts`
 - home suggestions are sourced from `src/mock-data/home/mocks/home-screen.ts`
-- Amplify messages, suggestions, nodes, and edges are sourced from `src/mock-data/amplify/mocks/workspace.ts`
+- Amplify workspaces, threads, wallet-seeded builder content, and example graph data are sourced from `src/mock-data/amplify/mocks/workspace.ts`
 
 ## Current Feature Breakdown
 
@@ -158,6 +158,7 @@ Current responsibilities:
 - client-side global chat workspace state shared by Home and the sidebar
 - route-backed active general-chat selection and recent-chat derivation
 - Home screen composition for the active global chat
+- empty-state Home CTA that can create a new blank Amplify workspace directly from below the shared composer
 - linked-context rendering for referenced Pools, Amplify workspaces, and nested items
 - mention-aware composer state and `@` target selection for Pools, Amplify workspaces, and nested items
 - chat submission flow that turns selected mentions into structured `ChatLink` entries on the active global chat
@@ -206,8 +207,15 @@ Current responsibilities:
 
 - Amplify route-level workspace composition
 - strategy graph and thread-capable chat layout
+- multi-workspace Amplify state with an active workspace selector
+- a blank builder workspace seeded with a wallet node for new strategy design
+- a separate seeded example workspace that preserves the original SOL loop as a running reference
+- compatibility-aware node creation from wallet assets and downstream node outputs
+- drag-from-output handle creation and right-click canvas creation using a mocked Amplify node catalog
+- graph persistence per workspace for created nodes, created edges, and moved nodes
+- client-side connection validation that rejects incompatible asset-to-node edges
 - promoted Amplify thread creation from the global chat system, including source metadata and summary-seeded context
-- sidebar Amplify navigation that treats each strategy workspace as its own section, each with an overview item, while the primary workspace also lists flat thread items
+- sidebar Amplify navigation that treats each strategy workspace as its own section with its own thread list
 - shared global preference panel mounted on the Amplify chat surface
 
 ### Amplify Mock Data
@@ -218,10 +226,18 @@ Current responsibilities:
 
 - chat message typing
 - Amplify workspace and thread typing
+- Amplify workspace kind typing for builder vs example workspaces
+- Amplify node kind typing for wallet, amount, strategy, split, reward, and destination nodes
+- compatibility metadata for allowed input assets and downstream node types
+- output metadata for primary and reward streams
+- node status typing plus active-snapshot and draft-state metadata
+- mocked Amplify node catalog definitions used by the builder picker
+- mocked node factory helpers used for output-based creation and disconnected canvas creation
+- wallet node typing and mocked wallet balances for the blank builder state
 - strategy node typing
 - split node typing
-- mocked Amplify workspace and thread content
-- mocked React Flow nodes and edges
+- mocked builder and example Amplify workspace content
+- mocked React Flow nodes and edges for both blank and seeded workspaces
 
 ## Component Boundary Rules
 

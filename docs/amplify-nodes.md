@@ -55,7 +55,7 @@ These concepts should guide implementation naming and ownership.
 
 ### Phase 1: Multi-Workspace Foundation
 
-Status: Pending
+Status: Complete
 
 #### Goal
 
@@ -63,22 +63,22 @@ Convert Amplify from a single hardcoded graph into a workspace system that can s
 
 #### Tasks
 
-- [ ] expand Amplify state from one workspace into multiple workspaces
-- [ ] introduce active workspace selection in the Amplify provider
-- [ ] add a blank builder workspace seeded with a wallet node
-- [ ] keep the current SOL loop as a separate example workspace
-- [ ] ensure the example workspace appears in the Amplify sidebar
-- [ ] ensure newly created Amplify workspaces appear in the Amplify sidebar
-- [ ] preserve existing Amplify thread behavior per workspace where practical
+- [x] expand Amplify state from one workspace into multiple workspaces
+- [x] introduce active workspace selection in the Amplify provider
+- [x] add a blank builder workspace seeded with a wallet node
+- [x] keep the current SOL loop as a separate example workspace
+- [x] ensure the example workspace appears in the Amplify sidebar
+- [x] ensure newly created Amplify workspaces appear in the Amplify sidebar
+- [x] preserve existing Amplify thread behavior per workspace where practical
 
 #### Deliverable
 
-- [ ] Amplify can switch between a blank builder workspace and the example workspace
-- [ ] the current graph no longer has to serve as both demo and editable builder state
+- [x] Amplify can switch between a blank builder workspace and the example workspace
+- [x] the current graph no longer has to serve as both demo and editable builder state
 
 ### Phase 2: Home Entry And Workspace Creation
 
-Status: Pending
+Status: Complete
 
 #### Goal
 
@@ -86,20 +86,20 @@ Give users a direct path from Home into building a new Amplify strategy.
 
 #### Tasks
 
-- [ ] add a `Create new Amplify` CTA below the empty-state Home prompt composer
-- [ ] wire that CTA to create a new blank Amplify workspace immediately
-- [ ] route the user to `/amplify` with the new workspace selected
-- [ ] give new workspaces a sensible default name such as `New Amplify Strategy`
-- [ ] keep the existing in-chat Amplify recommendation flow intact for conversational discovery
+- [x] add a `Create new Amplify` CTA below the empty-state Home prompt composer
+- [x] wire that CTA to create a new blank Amplify workspace immediately
+- [x] route the user to `/amplify` with the new workspace selected
+- [x] give new workspaces a sensible default name such as `New Amplify Strategy`
+- [x] keep the existing in-chat Amplify recommendation flow intact for conversational discovery
 
 #### Deliverable
 
-- [ ] a user can create a new Amplify directly from Home without first typing a chat prompt
-- [ ] the new workspace opens on a blank wallet-led builder canvas
+- [x] a user can create a new Amplify directly from Home without first typing a chat prompt
+- [x] the new workspace opens on a blank wallet-led builder canvas
 
 ### Phase 3: Graph Model And Node Types
 
-Status: Pending
+Status: Complete
 
 #### Goal
 
@@ -107,22 +107,22 @@ Replace the static node model with a builder-capable graph model.
 
 #### Tasks
 
-- [ ] define a discriminated node union for wallet, amount, strategy, split, reward, and destination nodes
-- [ ] add compatibility metadata for allowed input assets
-- [ ] add output metadata for primary outputs and reward outputs
-- [ ] add mocked holdings, APY or cost, and platform link metadata to relevant nodes
-- [ ] add node run states such as `draft`, `ready`, `active`, `impacted`, and `error`
-- [ ] add active snapshot and draft state types for post-run editing
-- [ ] migrate the current example graph onto the new node model
+- [x] define a discriminated node union for wallet, amount, strategy, split, reward, and destination nodes
+- [x] add compatibility metadata for allowed input assets
+- [x] add output metadata for primary outputs and reward outputs
+- [x] add mocked holdings, APY or cost, and platform link metadata to relevant nodes
+- [x] add node run states such as `draft`, `ready`, `active`, `impacted`, and `error`
+- [x] add active snapshot and draft state types for post-run editing
+- [x] migrate the current example graph onto the new node model
 
 #### Deliverable
 
-- [ ] Amplify graph state can represent both editable draft strategies and running example strategies
-- [ ] the type model is ready for compatibility-aware creation and mocked execution
+- [x] Amplify graph state can represent both editable draft strategies and running example strategies
+- [x] the type model is ready for compatibility-aware creation and mocked execution
 
 ### Phase 4: Builder Interactions
 
-Status: Pending
+Status: Complete
 
 #### Goal
 
@@ -130,21 +130,21 @@ Turn the canvas into a real strategy-building surface.
 
 #### Tasks
 
-- [ ] add wallet node UI that shows mocked wallet assets and balances
-- [ ] support creating a new node from a wallet asset output
-- [ ] add a contextual node picker near the cursor when creating from an output
-- [ ] show the full node catalog in that picker
-- [ ] disable incompatible nodes and explain why they cannot be selected
-- [ ] auto-connect newly created nodes to the originating output
-- [ ] add right-click creation on empty canvas from the full node catalog
-- [ ] allow disconnected nodes to exist in draft state
-- [ ] enforce compatibility rules on manual edge creation via `onConnect`
-- [ ] preserve edge labels that communicate the asset stream
+- [x] add wallet node UI that shows mocked wallet assets and balances
+- [x] support creating a new node by dragging from a wallet asset output
+- [x] add a contextual node picker near the cursor when creating from an output
+- [x] show the full node catalog in that picker
+- [x] disable incompatible nodes and explain why they cannot be selected
+- [x] auto-connect newly created nodes to the originating output
+- [x] add right-click creation on empty canvas from the full node catalog
+- [x] allow disconnected nodes to exist in draft state
+- [x] enforce compatibility rules on manual edge creation via `onConnect`
+- [x] preserve edge labels that communicate the asset stream
 
 #### Deliverable
 
-- [ ] users can build an Amplify flow directly on the canvas
-- [ ] creation feels guided without hiding the full strategy space
+- [x] users can build an Amplify flow directly on the canvas
+- [x] creation feels guided without hiding the full strategy space
 
 ### Phase 5: Inline Node Editing And Reward Routing
 
