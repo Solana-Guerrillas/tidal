@@ -6,7 +6,7 @@ import type {
   SplitNodeType,
   StrategyNodeType,
   WalletNodeType,
-} from "../types";
+} from "./types";
 import { amplifySupportedAssets } from "./catalog";
 
 function createNodeId(prefix: string) {

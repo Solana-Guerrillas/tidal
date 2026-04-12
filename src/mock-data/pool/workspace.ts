@@ -1,5 +1,5 @@
-import type { PoolWorkspace } from "../types";
-import { poolPanelTabs } from "../types";
+import type { PoolWorkspace } from "./types";
+import { poolPanelTabs } from "./types";
 
 export const poolWorkspace: PoolWorkspace = {
   id: "solana-stable-yield-pool",

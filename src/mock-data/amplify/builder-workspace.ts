@@ -1,6 +1,6 @@
 import type { Edge } from "@xyflow/react";
 
-import type { AmplifyGraphNode, AmplifyWorkspace } from "../types";
+import type { AmplifyGraphNode, AmplifyWorkspace } from "./types";
 import { createAmplifyWalletNode } from "./node-factories";
 
 function createId(prefix: string) {

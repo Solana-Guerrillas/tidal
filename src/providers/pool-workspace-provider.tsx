@@ -10,7 +10,7 @@ import {
 } from "react";
 
 import { usePreferenceProfile } from "@/providers/preference-profile-provider";
-import { poolWorkspace } from "@/mock-data/pool/mocks/workspace";
+import { poolWorkspace } from "@/mock-data/pool/workspace";
 import type {
   PoolPanelTab,
   PendingPoolAction,

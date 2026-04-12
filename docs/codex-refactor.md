@@ -149,17 +149,17 @@ src/
   lib/
   mock-data/
     shell/
-      mocks/
-      types/
+      types.ts
+      *.ts
     home/
-      mocks/
-      types/
+      types.ts
+      *.ts
     feature-a/
-      mocks/
-      types/
+      types.ts
+      *.ts
     feature-b/
-      mocks/
-      types/
+      types.ts
+      *.ts
 ```
 
 Notes:
@@ -167,7 +167,7 @@ Notes:
 - `ui/` stays generic
 - `brand/` or equivalent holds shared branded product components
 - product-area folders under `components/` own product-specific UI
-- `mock-data/` owns fake content
+- `mock-data/` owns fake content and can stay flat within each product area
 - `providers/`, `hooks/`, and `lib/` hold state, React behaviour, and helpers outside UI folders
 
 ## Boundary Rules

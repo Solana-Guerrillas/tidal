@@ -2,8 +2,8 @@ import {
   amplifyExampleNodes,
   amplifyExampleWorkspace,
   amplifyInitialWorkspaces,
-} from "@/mock-data/amplify/mocks/workspace";
-import { poolWorkspace } from "@/mock-data/pool/mocks/workspace";
+} from "@/mock-data/amplify/workspace";
+import { poolWorkspace } from "@/mock-data/pool/workspace";
 import type {
   SplitNodeData,
   StrategyNodeData,
@@ -17,7 +17,7 @@ import type {
   PreferenceProfile,
   WorkspaceSummary,
   WorkspaceThread,
-} from "../types";
+} from "./types";
 
 export const poolWorkspaceSummaries: WorkspaceSummary[] = [
   {

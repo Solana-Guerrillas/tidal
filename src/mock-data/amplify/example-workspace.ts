@@ -5,7 +5,7 @@ import type {
   AmplifyWorkspace,
   SplitNodeType,
   StrategyNodeType,
-} from "../types";
+} from "./types";
 import { amplifySuggestions } from "./catalog";
 
 const mainEdgeStyle = { stroke: "#61B3CF", strokeWidth: 2 };

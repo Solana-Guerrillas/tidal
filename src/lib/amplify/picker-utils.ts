@@ -1,4 +1,4 @@
-import { amplifyNodeCatalog, isCatalogItemCompatible } from "@/mock-data/amplify/mocks/workspace";
+import { amplifyNodeCatalog, isCatalogItemCompatible } from "@/mock-data/amplify/workspace";
 import type {
   AmplifyNodeCatalogItem,
   AmplifyNodeOutput,

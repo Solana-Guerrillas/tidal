@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 
-import { globalPreferenceProfile } from "@/mock-data/shell/mocks/hybrid-chat";
+import { globalPreferenceProfile } from "@/mock-data/shell/hybrid-chat";
 import type {
   InvestmentInterestLabel,
   PreferenceProfile,

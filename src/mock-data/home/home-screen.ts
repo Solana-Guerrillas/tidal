@@ -1,4 +1,4 @@
-import type { HomeScreenContent } from "../types";
+import type { HomeScreenContent } from "./types";
 
 export const homeScreenContent: HomeScreenContent = {
   suggestions: [

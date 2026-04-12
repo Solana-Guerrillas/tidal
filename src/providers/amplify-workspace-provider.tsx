@@ -12,7 +12,7 @@ import {
 import {
   amplifyInitialWorkspaces,
   createAmplifyBuilderWorkspace,
-} from "@/mock-data/amplify/mocks/workspace";
+} from "@/mock-data/amplify/workspace";
 import type {
   AmplifyGraphEdge,
   AmplifyGraphNode,

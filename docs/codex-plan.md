@@ -149,20 +149,20 @@ src/
     routes/
   mock-data/
     shell/
-      mocks/
-      types/
+      types.ts
+      *.ts
     home/
-      mocks/
-      types/
+      types.ts
+      *.ts
     pool/
-      mocks/
-      types/
+      types.ts
+      *.ts
     swap/
-      mocks/
-      types/
+      types.ts
+      *.ts
     amplify/
-      mocks/
-      types/
+      types.ts
+      *.ts
 ```
 
 Notes:
@@ -173,7 +173,7 @@ Notes:
 - `providers/` holds local mocked prototype state contexts
 - `hooks/` holds reusable React behaviour
 - `lib/` holds pure utilities, product-area helpers, and route builders
-- `mock-data/` owns prototype content grouped by product area
+- `mock-data/` owns prototype content grouped by product area, with a flat `types.ts` plus mock data files in each product-area folder
 - `src/app/globals.css` is the central home for theme tokens, semantic typography, layout helpers, and shared React Flow styling
 
 ## Component Boundary Rules

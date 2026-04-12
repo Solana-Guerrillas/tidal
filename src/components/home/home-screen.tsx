@@ -11,7 +11,7 @@ import { SectionLabel } from "@/components/tidal/section-label";
 import { SuggestionAction } from "@/components/tidal/suggestion-action";
 import { useGlobalChatWorkspace } from "@/providers/global-chat-workspace-provider";
 import { usePoolWorkspace } from "@/providers/pool-workspace-provider";
-import { homeScreenContent } from "@/mock-data/home/mocks/home-screen";
+import { homeScreenContent } from "@/mock-data/home/home-screen";
 import { useAmplifyWorkspace } from "@/providers/amplify-workspace-provider";
 import { WorkspacePromotionCard } from "@/components/tidal/workspace-promotion-card";
 import { WorkspaceButton } from "@/components/tidal/workspace-button";

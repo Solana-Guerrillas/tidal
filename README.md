@@ -105,11 +105,11 @@ Current mock-data areas:
 
 Amplify mock data is now split further into:
 
-- `src/mock-data/amplify/mocks/catalog.ts`: picker catalog definitions and compatibility-facing catalog metadata
-- `src/mock-data/amplify/mocks/node-factories.ts`: node creation helpers for builder flows
-- `src/mock-data/amplify/mocks/builder-workspace.ts`: blank builder workspace seeding
-- `src/mock-data/amplify/mocks/example-workspace.ts`: seeded example strategy workspace
-- `src/mock-data/amplify/mocks/workspace.ts`: small re-export surface for the rest of the app
+- `src/mock-data/amplify/catalog.ts`: picker catalog definitions and compatibility-facing catalog metadata
+- `src/mock-data/amplify/node-factories.ts`: node creation helpers for builder flows
+- `src/mock-data/amplify/builder-workspace.ts`: blank builder workspace seeding
+- `src/mock-data/amplify/example-workspace.ts`: seeded example strategy workspace
+- `src/mock-data/amplify/workspace.ts`: small re-export surface for the rest of the app
 
 ### `src/app/globals.css`
 

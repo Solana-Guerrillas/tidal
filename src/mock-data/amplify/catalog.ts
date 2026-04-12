@@ -1,4 +1,4 @@
-import type { AmplifyNodeCatalogItem } from "../types";
+import type { AmplifyNodeCatalogItem } from "./types";
 
 export const amplifySuggestions = [
   "Optimise this strategy",

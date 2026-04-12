@@ -21,7 +21,7 @@ import {
   globalChats,
   mentionTargets,
   poolWorkspaceSummaries,
-} from "@/mock-data/shell/mocks/hybrid-chat";
+} from "@/mock-data/shell/hybrid-chat";
 import type {
   AppMode,
   ChatLink,

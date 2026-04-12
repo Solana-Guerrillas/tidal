@@ -135,7 +135,7 @@ The intended prototype data flow is:
 
 Current:
 
-`mock-data/*/mocks` -> `providers/*` and `components/*/*-screen` -> product-area components and `components/tidal`
+`mock-data/*` -> `providers/*` and `components/*/*-screen` -> product-area components and `components/tidal`
 
 Styling system:
 
@@ -150,10 +150,10 @@ That means:
 
 Examples in the current repo:
 
-- sidebar navigation is sourced from `src/mock-data/shell/mocks/navigation.ts`
-- hybrid chat foundations are sourced from `src/mock-data/shell/mocks/hybrid-chat.ts`
-- home suggestions are sourced from `src/mock-data/home/mocks/home-screen.ts`
-- Amplify workspaces, threads, wallet-seeded builder content, and example graph data are split across `src/mock-data/amplify/mocks/catalog.ts`, `src/mock-data/amplify/mocks/node-factories.ts`, `src/mock-data/amplify/mocks/builder-workspace.ts`, and `src/mock-data/amplify/mocks/example-workspace.ts`, with `workspace.ts` acting as a small re-export surface
+- sidebar navigation is sourced from `src/mock-data/shell/navigation.ts`
+- hybrid chat foundations are sourced from `src/mock-data/shell/hybrid-chat.ts`
+- home suggestions are sourced from `src/mock-data/home/home-screen.ts`
+- Amplify workspaces, threads, wallet-seeded builder content, and example graph data are split across `src/mock-data/amplify/catalog.ts`, `src/mock-data/amplify/node-factories.ts`, `src/mock-data/amplify/builder-workspace.ts`, and `src/mock-data/amplify/example-workspace.ts`, with `workspace.ts` acting as a small re-export surface
 - Amplify workspace URLs are built from `src/lib/routes/amplify.ts` so the example strategy and each builder workspace have their own route-backed address
 
 ## Current Feature Breakdown
@@ -374,7 +374,7 @@ Files under `src/mock-data/*` should:
 When this prototype is later integrated into the real app, the intended replacement pattern is:
 
 1. Keep presentational and shared components where they are if they remain useful.
-2. Replace `mock-data/*/mocks` with real data adapters, view-model builders, or application state.
+2. Replace `mock-data/*` with real data adapters, view-model builders, or application state.
 3. Preserve the prop boundaries rather than moving business logic back into UI files.
 4. Continue to keep generic UI primitives separate from product-specific components.
 

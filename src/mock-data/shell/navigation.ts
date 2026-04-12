@@ -3,7 +3,7 @@ import {
   globalChats,
   poolWorkspaceSummaries,
 } from "./hybrid-chat";
-import type { SidebarNavigation } from "../types";
+import type { SidebarNavigation } from "./types";
 
 export const sidebarNavigation: SidebarNavigation = {
   poolItems: poolWorkspaceSummaries.map((workspace) => ({

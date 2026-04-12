@@ -35,7 +35,7 @@ import { useGlobalChatWorkspace } from "@/providers/global-chat-workspace-provid
 import { useAmplifyWorkspace } from "@/providers/amplify-workspace-provider";
 import { usePoolWorkspace } from "@/providers/pool-workspace-provider";
 import { getAmplifyWorkspaceHref } from "@/lib/routes/amplify";
-import { sidebarNavigation } from "@/mock-data/shell/mocks/navigation";
+import { sidebarNavigation } from "@/mock-data/shell/navigation";
 import { cn } from "@/lib/utils";
 
 export function AppSidebar() {
