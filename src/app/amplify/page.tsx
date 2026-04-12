@@ -3,9 +3,9 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-import { useAmplifyWorkspace } from "@/features/amplify/providers/amplify-workspace-provider";
-import { AmplifyWorkspace } from "@/features/amplify/screens/amplify-workspace";
-import { getAmplifyWorkspaceHref } from "@/lib/amplify-routes";
+import { useAmplifyWorkspace } from "@/providers/amplify-workspace-provider";
+import { AmplifyWorkspace } from "@/components/amplify/amplify-workspace";
+import { getAmplifyWorkspaceHref } from "@/lib/routes/amplify";
 
 export default function AmplifyPage() {
   const router = useRouter();

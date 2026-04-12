@@ -15,7 +15,7 @@ import {
   getGlobalChatHref,
   getGlobalChatIdFromPathname,
   NEW_GLOBAL_CHAT_ID,
-} from "@/lib/global-chat-routes";
+} from "@/lib/routes/global-chat";
 import {
   amplifyWorkspaceSummaries,
   globalChats,

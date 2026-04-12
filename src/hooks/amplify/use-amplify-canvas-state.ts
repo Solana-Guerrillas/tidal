@@ -22,7 +22,7 @@ import {
 import {
   AmplifyNodePickerGroupState,
   AmplifyNodePickerItemState,
-} from "@/features/amplify/components/amplify-node-picker";
+} from "@/components/amplify/amplify-node-picker";
 import {
   applySourceAssetToNode,
   buildActiveHoldingsLabel,
@@ -35,14 +35,14 @@ import {
   getDescendantNodeIds,
   getOutputById,
   toNodeMap,
-} from "@/features/amplify/lib/graph-utils";
+} from "@/lib/amplify/graph-utils";
 import {
   getDefaultPickerGroup,
   getPickerItemDisabledState,
   matchesPickerSearch,
   pickerGroupLabels,
   pickerGroupOrder,
-} from "@/features/amplify/lib/picker-utils";
+} from "@/lib/amplify/picker-utils";
 import {
   amplifyNodeCatalog,
   createAmplifyNodeFromCatalog,

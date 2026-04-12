@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 
-import { usePreferenceProfile } from "@/features/shell/providers/preference-profile-provider";
+import { usePreferenceProfile } from "@/providers/preference-profile-provider";
 import { poolWorkspace } from "@/mock-data/pool/mocks/workspace";
 import type {
   PoolPanelTab,

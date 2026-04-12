@@ -1,8 +1,8 @@
-import { PoolActivityList } from "@/features/pool/components/pool-activity-list";
-import { PoolDiscoveryCard } from "@/features/pool/components/pool-discovery-card";
-import { PoolPerformanceChart } from "@/features/pool/components/pool-performance-chart";
-import { PoolPositionCard } from "@/features/pool/components/pool-position-card";
-import { PoolRecommendationCard } from "@/features/pool/components/pool-recommendation-card";
+import { PoolActivityList } from "@/components/pool/pool-activity-list";
+import { PoolDiscoveryCard } from "@/components/pool/pool-discovery-card";
+import { PoolPerformanceChart } from "@/components/pool/pool-performance-chart";
+import { PoolPositionCard } from "@/components/pool/pool-position-card";
+import { PoolRecommendationCard } from "@/components/pool/pool-recommendation-card";
 import { SurfaceCard } from "@/components/tidal/surface-card";
 import { cn } from "@/lib/utils";
 import type {

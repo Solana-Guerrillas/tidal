@@ -16,7 +16,7 @@ The goal is to move a repo from:
 to:
 
 - thin route files
-- feature-owned screen composition
+- product-area screen composition
 - reusable branded design components
 - separated mock data
 - a central styling system
@@ -39,7 +39,7 @@ Do not use this as a rigid rulebook. Use it as a practical cleanup sequence.
 
 By the end of this refactor, the codebase should:
 
-- be easier to read by feature area
+- be easier to read by product area
 - separate mock content from rendered UI
 - have reusable design components for repeated product patterns
 - keep styling decisions in a small number of obvious places
@@ -97,24 +97,23 @@ Common location:
 - `src/components/<brand>`
 - or `src/components/system`
 
-### 4. Feature modules
+### 4. Product-area UI folders
 
 Product-area-owned UI and screen composition.
 
 Examples:
 
-- `features/home`
-- `features/pool`
-- `features/swap`
-- `features/amplify`
-- `features/shell`
+- `components/home`
+- `components/pool`
+- `components/swap`
+- `components/amplify`
+- `components/shell`
 
 Common responsibilities:
 
 - screen composition
-- feature-specific components
-- feature-local state
-- feature-only layout pieces
+- product-specific components
+- product-only layout pieces
 
 ### 5. Mock-data layer
 
@@ -141,27 +140,13 @@ src/
   components/
     ui/
     brand/
-  features/
     shell/
-      components/
-      screens/
-      providers/
-      types/
     home/
-      components/
-      screens/
-      providers/
-      types/
     feature-a/
-      components/
-      screens/
-      providers/
-      types/
     feature-b/
-      components/
-      screens/
-      providers/
-      types/
+  providers/
+  hooks/
+  lib/
   mock-data/
     shell/
       mocks/
@@ -175,17 +160,15 @@ src/
     feature-b/
       mocks/
       types/
-  hooks/
-  lib/
 ```
 
 Notes:
 
 - `ui/` stays generic
 - `brand/` or equivalent holds shared branded product components
-- `features/` owns product-area UI
+- product-area folders under `components/` own product-specific UI
 - `mock-data/` owns fake content
-- `lib/` should stay for generic helpers, not feature mock content
+- `providers/`, `hooks/`, and `lib/` hold state, React behaviour, and helpers outside UI folders
 
 ## Boundary Rules
 
@@ -197,18 +180,18 @@ Route files should:
 - render feature screens
 - avoid owning lots of layout or mock content
 
-### Feature screens
+### Product-area screens
 
-Feature screens should:
+Product-area screens should:
 
 - assemble the page
 - connect mock data to presentational components
 - own light feature state where needed
 - remain readable as composition files
 
-### Feature-specific components
+### Product-specific components
 
-Feature components should:
+Product-specific components should:
 
 - only exist if they belong to one product area
 - avoid embedded mock data
@@ -345,7 +328,7 @@ Group UI by product area and keep routes thin.
 
 #### Tasks
 
-- [ ] create a `features/*` structure or equivalent product-area grouping
+- [ ] create product-area component folders or an equivalent product-area grouping
 - [ ] move screen composition into feature screens
 - [ ] move feature-specific components under their owning feature
 - [ ] leave only route entrypoints in `app/`

@@ -23,8 +23,10 @@ Pool should be built within the structure that already exists in this repo.
 
 - `src/app`
   Thin route entrypoints only. Routes should render feature screens rather than build large UI inline.
-- `src/features/*`
-  Product-area UI, screen composition, and feature-owned components.
+- `src/components/{shell,home,pool,swap,amplify}`
+  Product-area UI and screen composition.
+- `src/providers`, `src/hooks`, and `src/lib`
+  Local mocked state contexts, React behaviour hooks, and pure frontend helpers.
 - `src/mock-data/*`
   Mocked content and lightweight frontend-facing types.
 - `src/components/ui`
@@ -40,7 +42,8 @@ Pool should be built within the structure that already exists in this repo.
 
 ### Practical ownership rules
 
-- if code only makes sense for Pool, keep it in `src/features/pool/*`
+- if UI only makes sense for Pool, keep it in `src/components/pool/*`
+- if Pool behaviour or pure helpers grow beyond the component layer, place them under `src/hooks/pool` or `src/lib/pool`
 - if data only exists to power the Pool prototype, keep it in `src/mock-data/pool/*`
 - if a visual pattern starts repeating across Pool, Swap, and Amplify, promote it to `src/components/tidal`
 - `src/components/ui` stays generic and should not become a Pool feature folder in disguise
@@ -74,7 +77,7 @@ The first Pool implementation should be a full workspace, not an isolated panel 
 
 - a real Pool route under `src/app`
 - the Pool route itself should land on an overview page for that Pool
-- a Pool screen in `src/features/pool/screens`
+- a Pool screen in `src/components/pool`
 - a top workspace header with the Pool name, an `Overview` tab, and chat tabs
 - a left/main conversation area for Pool chats
 - a right-hand Pool state panel
@@ -149,7 +152,7 @@ Render a real Pool workspace route using the feature-first repo structure.
 #### Tasks
 
 - [x] add or wire a real Pool route under `src/app`
-- [x] create the main Pool screen in `src/features/pool/screens`
+- [x] create the main Pool screen in `src/components/pool`
 - [x] add top Pool header with Pool name and chat tabs
 - [x] add main layout split between chat area and right-hand panel
 - [x] keep route files thin and feature-owned
@@ -244,10 +247,10 @@ Make Pool feel like part of the existing Tidal product system.
 
 Future Pool work should follow these file boundaries:
 
-- `src/features/pool/screens`
-  Pool screen composition and container-level workspace assembly
-- `src/features/pool/components`
-  Pool-only UI and feature-owned components
+- `src/components/pool`
+  Pool screen composition, container-level workspace assembly, and Pool-only UI
+- `src/providers/pool-workspace-provider.tsx`
+  local mocked Pool workspace state shared by the Pool screen and sidebar
 - `src/mock-data/pool`
   Pool mock content and lightweight types
 - `src/components/tidal`
@@ -257,7 +260,7 @@ Future Pool work should follow these file boundaries:
 
 Rules to keep the codebase clean:
 
-- if a component only makes sense for Pool, keep it in `src/features/pool/components`
+- if a component only makes sense for Pool, keep it in `src/components/pool`
 - if a pattern starts repeating across Pool, Swap, and Amplify, promote it to `src/components/tidal`
 - if a screen-level component starts owning too much mocked data, move that data back into `src/mock-data/pool`
 

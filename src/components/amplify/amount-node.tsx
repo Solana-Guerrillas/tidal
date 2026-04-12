@@ -6,8 +6,8 @@ import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { Badge } from "@/components/tidal/badge";
 import { CompactSelect } from "@/components/tidal/compact-select";
 import { SurfaceCard } from "@/components/tidal/surface-card";
-import { useAmplifyBuilderContext } from "@/features/amplify/components/amplify-builder-context";
-import { formatAmplifyStatusLabel } from "@/features/amplify/lib/status";
+import { useAmplifyBuilderContext } from "@/components/amplify/amplify-builder-context";
+import { formatAmplifyStatusLabel } from "@/lib/amplify/status";
 import type { AmountNodeType } from "@/mock-data/amplify/types";
 
 const amountModes = ["percent", "fixed"] as const;

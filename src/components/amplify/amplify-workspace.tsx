@@ -19,23 +19,23 @@ import "@xyflow/react/dist/style.css";
 import { Badge } from "@/components/tidal/badge";
 import { SurfaceCard } from "@/components/tidal/surface-card";
 import { useSidebar } from "@/components/ui/sidebar";
-import { AmountNode } from "@/features/amplify/components/amount-node";
-import { AmplifyBuilderContextProvider } from "@/features/amplify/components/amplify-builder-context";
-import { AmplifyChat } from "@/features/amplify/components/amplify-chat";
+import { AmountNode } from "@/components/amplify/amount-node";
+import { AmplifyBuilderContextProvider } from "@/components/amplify/amplify-builder-context";
+import { AmplifyChat } from "@/components/amplify/amplify-chat";
 import {
   AmplifyNodePicker,
   type AmplifyNodePickerGroupState,
   type AmplifyNodePickerItemState,
-} from "@/features/amplify/components/amplify-node-picker";
-import { DestinationNode } from "@/features/amplify/components/destination-node";
-import { RewardNode } from "@/features/amplify/components/reward-node";
-import { SplitNode } from "@/features/amplify/components/split-node";
-import { StrategyNode } from "@/features/amplify/components/strategy-node";
-import { WalletNode } from "@/features/amplify/components/wallet-node";
-import { useAmplifyCanvasState } from "@/features/amplify/hooks/use-amplify-canvas-state";
-import { getAmplifyWorkspaceHref } from "@/lib/amplify-routes";
-import { useAmplifyWorkspace } from "@/features/amplify/providers/amplify-workspace-provider";
-import { PoolWorkspaceHeader } from "@/features/pool/components/pool-workspace-header";
+} from "@/components/amplify/amplify-node-picker";
+import { DestinationNode } from "@/components/amplify/destination-node";
+import { RewardNode } from "@/components/amplify/reward-node";
+import { SplitNode } from "@/components/amplify/split-node";
+import { StrategyNode } from "@/components/amplify/strategy-node";
+import { WalletNode } from "@/components/amplify/wallet-node";
+import { useAmplifyCanvasState } from "@/hooks/amplify/use-amplify-canvas-state";
+import { getAmplifyWorkspaceHref } from "@/lib/routes/amplify";
+import { useAmplifyWorkspace } from "@/providers/amplify-workspace-provider";
+import { WorkspaceHeader } from "@/components/tidal/workspace-header";
 import type {
   AmplifyNodePickerGroup,
   AmplifyWorkspace as AmplifyWorkspaceType,
@@ -310,7 +310,7 @@ export function AmplifyWorkspace({
   return (
     <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-background">
       {!isCanvasFullscreen ? (
-        <PoolWorkspaceHeader
+        <WorkspaceHeader
           workspaceName={workspace.name}
           threads={workspace.threads}
           activeThreadId={activeThread.id}

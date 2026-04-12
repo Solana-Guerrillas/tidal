@@ -1,10 +1,10 @@
 "use client";
 
-import { PoolConversationPane } from "@/features/pool/components/pool-conversation-pane";
-import { PoolOverviewPane } from "@/features/pool/components/pool-overview-pane";
-import { PoolPanelShell } from "@/features/pool/components/pool-panel-shell";
-import { PoolWorkspaceHeader } from "@/features/pool/components/pool-workspace-header";
-import { usePoolWorkspace } from "@/features/pool/providers/pool-workspace-provider";
+import { PoolConversationPane } from "@/components/pool/pool-conversation-pane";
+import { PoolOverviewPane } from "@/components/pool/pool-overview-pane";
+import { PoolPanelShell } from "@/components/pool/pool-panel-shell";
+import { WorkspaceHeader } from "@/components/tidal/workspace-header";
+import { usePoolWorkspace } from "@/providers/pool-workspace-provider";
 
 export function PoolScreen() {
   const {
@@ -24,7 +24,7 @@ export function PoolScreen() {
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-background">
-      <PoolWorkspaceHeader
+      <WorkspaceHeader
         workspaceName={workspace.name}
         threads={workspace.threads}
         isOverviewActive={isOverviewActive}

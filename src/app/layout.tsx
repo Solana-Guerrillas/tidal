@@ -4,12 +4,12 @@ import "./globals.css";
 
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AmplifyWorkspaceProvider } from "@/features/amplify/providers/amplify-workspace-provider";
-import { GlobalChatWorkspaceProvider } from "@/features/home/providers/global-chat-workspace-provider";
-import { PoolWorkspaceProvider } from "@/features/pool/providers/pool-workspace-provider";
-import { AppHeader } from "@/features/shell/components/app-header";
-import { AppSidebar } from "@/features/shell/components/app-sidebar";
-import { PreferenceProfileProvider } from "@/features/shell/providers/preference-profile-provider";
+import { AmplifyWorkspaceProvider } from "@/providers/amplify-workspace-provider";
+import { GlobalChatWorkspaceProvider } from "@/providers/global-chat-workspace-provider";
+import { PoolWorkspaceProvider } from "@/providers/pool-workspace-provider";
+import { AppHeader } from "@/components/shell/app-header";
+import { AppSidebar } from "@/components/shell/app-sidebar";
+import { PreferenceProfileProvider } from "@/providers/preference-profile-provider";
 
 const inter = Inter({
   variable: "--font-inter",

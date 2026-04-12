@@ -31,10 +31,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useGlobalChatWorkspace } from "@/features/home/providers/global-chat-workspace-provider";
-import { useAmplifyWorkspace } from "@/features/amplify/providers/amplify-workspace-provider";
-import { usePoolWorkspace } from "@/features/pool/providers/pool-workspace-provider";
-import { getAmplifyWorkspaceHref } from "@/lib/amplify-routes";
+import { useGlobalChatWorkspace } from "@/providers/global-chat-workspace-provider";
+import { useAmplifyWorkspace } from "@/providers/amplify-workspace-provider";
+import { usePoolWorkspace } from "@/providers/pool-workspace-provider";
+import { getAmplifyWorkspaceHref } from "@/lib/routes/amplify";
 import { sidebarNavigation } from "@/mock-data/shell/mocks/navigation";
 import { cn } from "@/lib/utils";
 

@@ -14,7 +14,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { PreferenceContextPanel } from "@/components/tidal/preference-context-panel";
-import { usePreferenceProfile } from "@/features/shell/providers/preference-profile-provider";
+import { usePreferenceProfile } from "@/providers/preference-profile-provider";
 
 export function AppHeader() {
   const { profile, toggleInterestOption, toggleRiskOption } = usePreferenceProfile();

@@ -9,13 +9,13 @@ import { ThreadOwnershipBanner } from "@/components/tidal/thread-ownership-banne
 import { PromptComposer } from "@/components/tidal/prompt-composer";
 import { SectionLabel } from "@/components/tidal/section-label";
 import { SuggestionAction } from "@/components/tidal/suggestion-action";
-import { useGlobalChatWorkspace } from "@/features/home/providers/global-chat-workspace-provider";
-import { usePoolWorkspace } from "@/features/pool/providers/pool-workspace-provider";
+import { useGlobalChatWorkspace } from "@/providers/global-chat-workspace-provider";
+import { usePoolWorkspace } from "@/providers/pool-workspace-provider";
 import { homeScreenContent } from "@/mock-data/home/mocks/home-screen";
-import { useAmplifyWorkspace } from "@/features/amplify/providers/amplify-workspace-provider";
+import { useAmplifyWorkspace } from "@/providers/amplify-workspace-provider";
 import { WorkspacePromotionCard } from "@/components/tidal/workspace-promotion-card";
 import { WorkspaceButton } from "@/components/tidal/workspace-button";
-import { getAmplifyWorkspaceHref } from "@/lib/amplify-routes";
+import { getAmplifyWorkspaceHref } from "@/lib/routes/amplify";
 
 export function HomeScreen() {
   const router = useRouter();

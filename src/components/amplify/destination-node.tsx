@@ -5,7 +5,7 @@ import { Handle, Position, type NodeProps } from "@xyflow/react";
 
 import { Badge } from "@/components/tidal/badge";
 import { SurfaceCard } from "@/components/tidal/surface-card";
-import { formatAmplifyStatusLabel } from "@/features/amplify/lib/status";
+import { formatAmplifyStatusLabel } from "@/lib/amplify/status";
 import type { DestinationNodeType } from "@/mock-data/amplify/types";
 
 export const DestinationNode = memo(

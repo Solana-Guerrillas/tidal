@@ -1,4 +1,4 @@
-import { PoolScreen } from "@/features/pool/screens/pool-screen";
+import { PoolScreen } from "@/components/pool/pool-screen";
 
 export default function PoolPage() {
   return <PoolScreen />;

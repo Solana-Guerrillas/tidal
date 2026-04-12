@@ -1,4 +1,4 @@
-import { AmplifyWorkspace } from "@/features/amplify/screens/amplify-workspace";
+import { AmplifyWorkspace } from "@/components/amplify/amplify-workspace";
 
 export default async function AmplifyWorkspacePage({
   params,

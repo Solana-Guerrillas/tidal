@@ -8,8 +8,8 @@ import type {
   SplitNodeData,
   StrategyNodeData,
 } from "@/mock-data/amplify/types";
-import { getAmplifyWorkspaceHref } from "@/lib/amplify-routes";
-import { getGlobalChatHref } from "@/lib/global-chat-routes";
+import { getAmplifyWorkspaceHref } from "@/lib/routes/amplify";
+import { getGlobalChatHref } from "@/lib/routes/global-chat";
 
 import type {
   GlobalChat,

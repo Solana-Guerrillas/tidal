@@ -7,8 +7,8 @@ import { Timer } from "@phosphor-icons/react";
 import { Badge } from "@/components/tidal/badge";
 import { CompactSelect } from "@/components/tidal/compact-select";
 import { SurfaceCard } from "@/components/tidal/surface-card";
-import { useAmplifyBuilderContext } from "@/features/amplify/components/amplify-builder-context";
-import { formatAmplifyStatusLabel } from "@/features/amplify/lib/status";
+import { useAmplifyBuilderContext } from "@/components/amplify/amplify-builder-context";
+import { formatAmplifyStatusLabel } from "@/lib/amplify/status";
 import { collectIntervals, type RewardNodeType } from "@/mock-data/amplify/types";
 
 export const RewardNode = memo(

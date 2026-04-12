@@ -6,7 +6,7 @@ type WorkspaceHeaderThread = {
   title: string;
 };
 
-type PoolWorkspaceHeaderProps = {
+type WorkspaceHeaderProps = {
   className?: string;
   workspaceName: string;
   threads: WorkspaceHeaderThread[];
@@ -20,7 +20,7 @@ type PoolWorkspaceHeaderProps = {
   newChatLabel?: string;
 };
 
-export function PoolWorkspaceHeader({
+export function WorkspaceHeader({
   className,
   workspaceName,
   threads,
@@ -32,7 +32,7 @@ export function PoolWorkspaceHeader({
   onThreadSelect,
   onNewChat,
   newChatLabel = "New chat",
-}: PoolWorkspaceHeaderProps) {
+}: WorkspaceHeaderProps) {
   return (
     <header
       className={cn(

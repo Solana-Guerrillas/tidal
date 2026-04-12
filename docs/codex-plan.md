@@ -33,7 +33,7 @@ What currently needs work:
 
 ## Target Shape
 
-The frontend should be structured in four layers:
+The frontend should be structured around responsibility-first folders:
 
 ### 1. Generic UI primitives
 
@@ -70,7 +70,46 @@ Location:
 
 - `src/components/tidal`
 
-### 3. Mock data containers
+### 3. Product-area UI components
+
+UI and screen composition that only belongs to one Tidal product area.
+
+Examples:
+
+- Pool screen composition
+- Swap screen composition
+- Amplify graph screen composition
+- Home global-chat composition
+- Shell frame components
+
+Location:
+
+- `src/components/shell`
+- `src/components/home`
+- `src/components/pool`
+- `src/components/swap`
+- `src/components/amplify`
+
+### 4. Providers, hooks, and frontend helpers
+
+Local mocked state, React behaviour, and pure helpers should live outside UI folders.
+
+Examples:
+
+- global chat workspace provider
+- Pool workspace provider
+- Amplify workspace provider
+- Amplify canvas state hook
+- Amplify graph and picker utilities
+- route builders
+
+Location:
+
+- `src/providers`
+- `src/hooks`
+- `src/lib`
+
+### 5. Mock data containers
 
 Prototype data grouped by product area, plus the lightweight types that describe it.
 
@@ -89,25 +128,6 @@ Location:
 - `src/mock-data/swap`
 - `src/mock-data/amplify`
 
-### 4. Feature modules
-
-Product-area-owned UI, screen assembly, and feature-specific composition.
-
-Examples:
-
-- Pool screens and Pool-specific components
-- Swap screens and Swap-specific components
-- Amplify screens and Amplify-specific components
-- Shell-level app frame components
-
-Location:
-
-- `src/features/shell`
-- `src/features/home`
-- `src/features/pool`
-- `src/features/swap`
-- `src/features/amplify`
-
 ## Recommended Folder Structure
 
 ```text
@@ -116,27 +136,17 @@ src/
   components/
     ui/
     tidal/
-  features/
     shell/
-      components/
-      screens/
-      types/
     home/
-      components/
-      screens/
-      types/
     pool/
-      components/
-      screens/
-      types/
     swap/
-      components/
-      screens/
-      types/
     amplify/
-      components/
-      screens/
-      types/
+  providers/
+  hooks/
+    amplify/
+  lib/
+    amplify/
+    routes/
   mock-data/
     shell/
       mocks/
@@ -153,16 +163,17 @@ src/
     amplify/
       mocks/
       types/
-  hooks/
-  lib/
 ```
 
 Notes:
 
 - `ui/` stays generic and reusable across any app
 - `tidal/` holds shared branded patterns that represent the design system of this product
+- `components/{shell,home,pool,swap,amplify}` holds product-area UI and screen composition
+- `providers/` holds local mocked prototype state contexts
+- `hooks/` holds reusable React behaviour
+- `lib/` holds pure utilities, product-area helpers, and route builders
 - `mock-data/` owns prototype content grouped by product area
-- `features/` owns product-area UI, screens, and feature-specific composition
 - `src/app/globals.css` is the central home for theme tokens, semantic typography, layout helpers, and shared React Flow styling
 
 ## Component Boundary Rules
@@ -202,20 +213,20 @@ Examples:
 - amplify workspace container
 - pool recommendation screen container
 
-### Feature modules
+### Product-area UI folders
 
-Feature modules should:
+Product-area UI folders should:
 
-- group UI by product area
 - own screen-level composition for that area
 - contain feature-specific components that are not generic enough for `components/tidal`
 - keep product-area responsibilities easy to find
+- avoid owning providers, hooks, pure helpers, mock data, backend clients, or blockchain integration code
 
 Examples:
 
-- `features/amplify/screens/AmplifyWorkspace`
-- `features/amplify/components/*`
-- `features/shell/components/AppSidebar`
+- `components/amplify/amplify-workspace.tsx`
+- `components/amplify/*-node.tsx`
+- `components/shell/app-sidebar.tsx`
 
 ### Mock data modules
 
@@ -268,10 +279,10 @@ The styling work should focus on systemising the current look rather than redesi
 #### Shared product components
 
 - [x] `src/components/tidal/prompt-composer.tsx`
-- [x] `src/features/shell/components/app-sidebar.tsx`
-- [x] `src/features/amplify/components/amplify-chat.tsx`
-- [x] `src/features/amplify/components/strategy-node.tsx`
-- [x] `src/features/amplify/components/split-node.tsx`
+- [x] `src/components/shell/app-sidebar.tsx`
+- [x] `src/components/amplify/amplify-chat.tsx`
+- [x] `src/components/amplify/strategy-node.tsx`
+- [x] `src/components/amplify/split-node.tsx`
 
 #### Styling foundation
 
@@ -319,22 +330,23 @@ Create a reusable branded design component layer.
 - [x] pages compose branded components instead of raw Tailwind blocks
 - [x] the visual language becomes explicit and reusable
 
-### Phase 3: Feature Module Refactor
+### Phase 3: Product-Area Structure Refactor
 
 Status: Complete
 
 #### Goal
 
-Move from page-centric implementation to a real product-area feature structure.
+Move from page-centric implementation to a clear product-area UI structure.
 
 #### Tasks
 
-- [x] create `features/shell`, `features/home`, `features/pool`, `features/swap`, and `features/amplify`
-- [x] move product-specific screens and feature-owned components into those folders
+- [x] create `components/shell`, `components/home`, `components/pool`, `components/swap`, and `components/amplify`
+- [x] move product-specific screens and product-area components into those folders
 - [x] keep `mock-data/*` as the separate prototype content layer
-- [x] define clear ownership between `components/tidal` and `features/*/components`
+- [x] define clear ownership between `components/tidal` and product-area component folders
 - [x] keep `app/` routes very thin
 - [x] isolate product-area composition from visual rendering
+- [x] move providers, hooks, and pure helpers out of the old feature layer
 
 #### Deliverables
 
@@ -368,11 +380,11 @@ Turn the current visual direction into a defined system.
 
 - [x] Introduce `src/components/tidal` and move shared branded patterns there.
 - [x] Start extracting repeated layout and message patterns from the home and Amplify screens.
-- [x] Introduce `src/features/shell`, `src/features/home`, and `src/features/amplify` as the first real feature modules.
-- [x] Move the current home screen and Amplify workspace composition into those feature folders.
-- [x] Move feature-owned components out of `src/components/amplify` into `src/features/amplify/components`.
+- [x] Introduce product-area component folders for Shell, Home, Pool, Swap, and Amplify.
+- [x] Move the current home screen and Amplify workspace composition into those product-area component folders.
+- [x] Keep Amplify-specific UI in `src/components/amplify` and shared branded UI in `src/components/tidal`.
 - [x] Keep thinning `app/` routes so they mostly render feature screens.
-- [x] Add initial `features/pool` and `features/swap` folders so the repo shape reflects the intended product.
+- [x] Add initial Pool and Swap product-area folders so the repo shape reflects the intended product.
 - [x] Seed the shared shell mock-data layer with hybrid chat foundations for global chats, links, mention targets, promoted workspace threads, and global preference state.
 - [x] Turn Home into a real global chat workspace and wire the shared sidebar to active global chat state and linked-context metadata.
 - [x] Extend the shared global chat flow with a mention-aware composer and route-backed chat updates that resolve `@` selections into structured links.
@@ -389,9 +401,10 @@ Turn the current visual direction into a defined system.
 - [x] Add Phase 7 workspace polish including fullscreen canvas focus mode, header/chat hiding, and documentation updates for Amplify.
 - [x] Replace the flat Amplify node picker with a shared tabbed picker using hybrid categories, search, and disabled constrained states.
 - [x] Give Amplify workspaces addressable `/amplify/[workspaceId]` URLs and route all sidebar/Home entry points to the selected workspace.
-- [x] Refactor Amplify back toward the earlier hygiene bar by splitting mock-data concerns, extracting canvas graph state into a feature hook, and deleting dead node paths.
+- [x] Refactor Amplify back toward the earlier hygiene bar by splitting mock-data concerns, extracting canvas graph state into `src/hooks/amplify`, and deleting dead node paths.
 - [x] Standardise ownership and promotion UI across Home, Pool, and Amplify with shared banners, summary panels, and promotion cards.
-- [ ] Decide the first real Pool and Swap screens to add under the new feature structure.
+- [x] Remove the redundant `src/features` layer and split its contents into product-area components, providers, hooks, and lib helpers.
+- [ ] Decide the first real Swap screen to add under the product-area component structure.
 - [x] Continue replacing raw text sizes and page spacing values with the new semantic classes in `globals.css`.
 - [x] Decide the intentional mobile layout behaviour for Amplify.
 - [x] Document the semantic styling conventions now living in `globals.css`.
@@ -401,7 +414,7 @@ Turn the current visual direction into a defined system.
 - [x] page files are thin and mostly declarative
 - [x] mock data is not embedded in UI component files
 - [x] shared branded components exist for repeated Tidal patterns
-- [x] product-area UI lives in `features/*` rather than in mixed top-level component folders
+- [x] product-area UI lives in `components/{shell,home,pool,swap,amplify}` while providers, hooks, helpers, and mock data live outside UI folders
 - [x] styling decisions are encoded in reusable components and variants
 - [x] another developer can connect real logic without rewriting the visual layer
 - [x] the repo remains lightweight and prototype-friendly

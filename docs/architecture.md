@@ -17,7 +17,7 @@ Feature-specific implementation planning can live in dedicated docs alongside th
 
 ## Current Shape
 
-After the repo-wide cleanup phases and the first full Pool implementation, the repo is organised around five broad layers:
+After the repo-wide cleanup phases, the first full Pool implementation, and the feature-folder removal, the repo is organised around six broad areas:
 
 ### 1. App routes
 
@@ -63,11 +63,54 @@ Current examples:
 - `PromotionSummaryPanel`
 - `WorkspacePromotionCard`
 - `WorkspaceButton`
+- `WorkspaceHeader`
 - `SurfaceCard`
 - `Badge`
 - `CompactSelect`
 
-### 4. Mock-data layer
+### 4. Product-area UI components
+
+Product-area UI lives under `src/components` by product area.
+
+Current product-area component folders:
+
+- `src/components/shell`
+- `src/components/home`
+- `src/components/pool`
+- `src/components/swap`
+- `src/components/amplify`
+
+These folders are for UI and screen composition that only makes sense for one Tidal product area. They should not become state, mock-data, or backend integration folders.
+
+Examples:
+
+- `src/components/home/home-screen.tsx`
+- `src/components/pool/pool-screen.tsx`
+- `src/components/amplify/amplify-workspace.tsx`
+- `src/components/shell/app-sidebar.tsx`
+
+### 5. Providers, hooks, and frontend helpers
+
+Shared prototype state, React behaviour, and pure frontend helpers live outside UI folders.
+
+Current locations:
+
+- `src/providers`: local mocked workspace/app state contexts
+- `src/hooks`: reusable React hooks and product-area behaviour hooks
+- `src/lib`: pure utilities, route helpers, and product-area helper functions
+
+Current examples:
+
+- `src/providers/global-chat-workspace-provider.tsx`
+- `src/providers/pool-workspace-provider.tsx`
+- `src/providers/amplify-workspace-provider.tsx`
+- `src/hooks/amplify/use-amplify-canvas-state.ts`
+- `src/lib/amplify/graph-utils.ts`
+- `src/lib/amplify/picker-utils.ts`
+- `src/lib/routes/amplify.ts`
+- `src/lib/routes/global-chat.ts`
+
+### 6. Mock-data layer
 
 Mocked data and lightweight types live under `src/mock-data`.
 
@@ -86,49 +129,32 @@ These modules currently provide:
 - typed mock Pool workspace state, threads, panel tabs, positions, recommendations, discovery items, activity, and health data
 - typed mock Amplify chat content and graph data
 
-### 5. Feature modules
-
-`src/features` is now the product-area layer.
-
-This layer is intended for:
-
-- screen-level composition by product area
-- feature-owned components
-- product-specific UI that is not generic enough for `src/components/tidal`
-
-Planned feature areas:
-
-- `src/features/shell`
-- `src/features/home`
-- `src/features/pool`
-- `src/features/swap`
-- `src/features/amplify`
-
 ## Data Flow
 
 The intended prototype data flow is:
 
 Current:
 
-`mock-data/*/mocks` -> `features/*/screens` -> `features/*/components` and `components/tidal`
+`mock-data/*/mocks` -> `providers/*` and `components/*/*-screen` -> product-area components and `components/tidal`
 
 Styling system:
 
-`src/app/globals.css` -> semantic typography/layout classes -> `components/tidal` and `features/*`
+`src/app/globals.css` -> semantic typography/layout classes -> `components/tidal` and product-area components
 
 That means:
 
 - mock content should not live directly inside UI component files
 - components should receive content via props where practical
 - route files should compose screens using feature data instead of embedding it
+- backend or blockchain integration clients should not be introduced in this prototype repo
 
 Examples in the current repo:
 
 - sidebar navigation is sourced from `src/mock-data/shell/mocks/navigation.ts`
 - hybrid chat foundations are sourced from `src/mock-data/shell/mocks/hybrid-chat.ts`
 - home suggestions are sourced from `src/mock-data/home/mocks/home-screen.ts`
-- Amplify workspaces, threads, wallet-seeded builder content, and example graph data are now split across `src/mock-data/amplify/mocks/catalog.ts`, `src/mock-data/amplify/mocks/node-factories.ts`, `src/mock-data/amplify/mocks/builder-workspace.ts`, and `src/mock-data/amplify/mocks/example-workspace.ts`, with `workspace.ts` acting as a small re-export surface
-- Amplify workspace URLs are built from `src/lib/amplify-routes.ts` so the example strategy and each builder workspace have their own route-backed address
+- Amplify workspaces, threads, wallet-seeded builder content, and example graph data are split across `src/mock-data/amplify/mocks/catalog.ts`, `src/mock-data/amplify/mocks/node-factories.ts`, `src/mock-data/amplify/mocks/builder-workspace.ts`, and `src/mock-data/amplify/mocks/example-workspace.ts`, with `workspace.ts` acting as a small re-export surface
+- Amplify workspace URLs are built from `src/lib/routes/amplify.ts` so the example strategy and each builder workspace have their own route-backed address
 
 ## Current Feature Breakdown
 
@@ -153,7 +179,9 @@ Current responsibilities:
 - home screen content types
 - mocked suggestion content
 
-`src/features/home` now owns the global chat-first surface used on `/`.
+`src/components/home` owns the global chat-first surface used on `/`.
+
+`src/providers/global-chat-workspace-provider.tsx` owns the local mocked global-chat state shared by Home and the sidebar.
 
 Current responsibilities:
 
@@ -188,7 +216,9 @@ Current responsibilities:
 
 ### Pool
 
-`src/features/pool` now owns the first full Pool workspace surface.
+`src/components/pool` owns the first full Pool workspace surface.
+
+`src/providers/pool-workspace-provider.tsx` owns the local mocked Pool workspace state shared by the Pool screen and sidebar.
 
 Current responsibilities:
 
@@ -202,15 +232,19 @@ Current responsibilities:
 - shared global preference panel mounted on both Pool overview and focused Pool thread surfaces
 - sidebar Pool navigation that treats the Pool as a named workspace section with an overview item and flat thread items beneath it
 
-### Amplify Feature
+### Amplify
 
-`src/features/amplify` continues to own the strategy workspace and chat surface.
+`src/components/amplify` owns the strategy workspace and chat surface.
+
+`src/providers/amplify-workspace-provider.tsx` owns the local mocked multi-workspace Amplify state.
+
+`src/hooks/amplify/use-amplify-canvas-state.ts` owns the React Flow canvas behaviour, while pure graph and picker helpers live under `src/lib/amplify`.
 
 Current responsibilities:
 
 - Amplify route-level workspace composition
 - strategy graph and thread-capable chat layout
-- a thin workspace screen that delegates canvas graph state into `features/amplify/hooks/use-amplify-canvas-state.ts`
+- a thin workspace screen that delegates canvas graph state into `src/hooks/amplify/use-amplify-canvas-state.ts`
 - multi-workspace Amplify state with an active workspace selector
 - a blank builder workspace seeded with a wallet node for new strategy design
 - a separate seeded example workspace that preserves the original SOL loop as a running reference
@@ -282,21 +316,13 @@ These components now cover:
 - small badges and pills
 - compact dropdown fields
 
-### Shared product components
+### Product-area components
 
-Files such as `src/features/shell/components/app-sidebar.tsx` should:
+Files such as `src/components/shell/app-sidebar.tsx` should:
 
 - accept data and state via props where practical
-- stay reusable across multiple routes
 - avoid owning embedded mock content
-
-### Feature modules
-
-Files under `src/features/*` should:
-
-- group code by product area
-- own screen composition for that area
-- contain feature-specific components that do not belong in `components/tidal`
+- contain product-area UI that does not belong in `components/tidal`
 - keep the route layer thin
 - stay separate from the `mock-data` layer
 - keep raw visual values light, and promote repeated styling into `components/tidal` or `src/app/globals.css`
@@ -317,7 +343,7 @@ The styling split should be:
 
 - `src/app/globals.css`: design tokens and semantic utility classes such as `tidal-text-*`, `tidal-page`, `tidal-workspace`, and sidebar helpers
 - `src/components/tidal`: reusable branded components and variants built on those semantic classes
-- `src/features/*`: screen composition and light feature-specific layout only
+- `src/components/{shell,home,pool,swap,amplify}`: screen composition and light product-area layout only
 
 Rules for future work:
 
@@ -359,10 +385,11 @@ The main integration goal is to swap data sources and state wiring, not to rewri
 The architecture is expected to move further in this direction as `docs/codex-plan.md` progresses:
 
 - continue expanding `src/components/tidal` for reusable branded product components
-- introduce `src/features` as the product-area structure for Shell, Pool, Swap, and Amplify
+- keep product-area UI under `src/components/{shell,home,pool,swap,amplify}`
+- keep providers, hooks, and pure helpers outside UI folders
 - expand `src/mock-data` to include clearer Pool and Swap mock content
 - continue centralising semantic typography and layout rules in `src/app/globals.css`
-- continue replacing raw feature-level styling values with semantic classes from `globals.css`
+- continue replacing raw product-area styling values with semantic classes from `globals.css`
 - keep `src/app` route files thin
 - continue reducing screen-specific Tailwind duplication
 
