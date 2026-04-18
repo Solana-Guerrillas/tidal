@@ -181,6 +181,82 @@ When moving this prototype into a production app:
 4. Keep UI primitives generic.
 5. Keep workspace-specific behavior under `src/components/workspace`, `src/hooks/workspace`, and `src/lib/workspace` until a production architecture requires a different boundary.
 
+## Backend Layer (Active Development)
+
+The repo is transitioning from frontend prototype to working product per `tidal-prd.md` (v2.1). Backend integration is in active development. The constraints in the "Constraints" section above apply to workspace UI and mock-data patterns; they do not block backend work described here.
+
+### Backend Folder Layout
+
+```
+src/lib/solana/
+  connection.ts      # Solana RPC connection + fallback
+  kamino.ts          # Kamino Lend adapter (supply, withdraw, positions)
+  jupiter-lend.ts    # Jupiter Lend adapter
+  jito.ts            # JitoSOL staking (mint/redeem)
+  sanctum.ts         # Sanctum INF staking
+  jupiter-swap.ts    # Jupiter Ultra swap aggregation
+  registry.ts        # Protocol registry
+
+src/lib/ai/
+  tools-solana.ts    # Solana-specific AI tools
+  tools.ts           # Shared tools (yield scanning)
+  prompts.ts         # Agent prompts
+
+src/app/api/
+  chat/route.ts          # AI agent endpoint
+  yields/route.ts        # DeFi Llama scanner
+  solana/rates/route.ts  # Live APY from on-chain reads
+  solana/positions/route.ts  # Portfolio positions
+```
+
+Route handlers stay thin. Business logic lives in `src/lib/*`.
+
+### Data Flow (Backend-Integrated)
+
+Mocked flow remains the fallback and UI-development path:
+
+```
+src/mock-data/* -> src/providers/* -> workspace UI
+```
+
+Real flow slots adapters behind the same provider boundary:
+
+```
+src/lib/solana/*  ─┐
+src/lib/ai/*      ─┼─> src/app/api/* -> src/providers/* -> workspace UI
+DeFi Llama API    ─┘
+```
+
+Workspace UI components should not import from `src/lib/solana` or SDK clients directly. They consume data through providers, which call API routes, which call adapters.
+
+### Wallet And Auth
+
+- **Privy** with `walletChainType: 'ethereum-and-solana'`
+- External connectors for Phantom and Backpack
+- Embedded wallets for email/social login (zero-friction onboarding)
+- Wallet state is injected at the layout/provider level, not at the component level
+
+### AI Agent
+
+- **Vercel AI SDK v6** with Claude
+- Tools defined in `src/lib/ai/tools-solana.ts`: `stakeSOL`, `lendUSDC`, `withdrawLend`, `swapToken`, `scanSolanaYields`, `getSolanaRates`, `compareYields`
+- Chat endpoint at `src/app/api/chat/route.ts`
+- Agent prepares transactions; user signs in the wallet; adapter executes
+
+### Protocol Adapters
+
+Each adapter in `src/lib/solana/*` exposes a uniform shape suitable for the `registry.ts` index:
+
+- position reads (balance, accrued yield, current APY)
+- action builders (returns a Solana `Transaction` or versioned tx for signing)
+- metadata (protocol name, TVL pointer, risk tier)
+
+No ERC-4626 equivalent exists on Solana — adapters are per-protocol rather than per-standard.
+
+### Out Of Scope (Parked From v1)
+
+EVM chain configs, Li.Fi SDK, AAVE V3 adapters, ERC-4626 vault adapter, and wagmi hooks are parked. Do not re-introduce without approval.
+
 ## Maintenance Rule
 
 When structural frontend changes are made:

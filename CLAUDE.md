@@ -156,3 +156,57 @@ bun run build
 ```
 
 Note: the current build may require network access because `next/font/google` fetches Inter. If that becomes a problem, replace it with a local font or system font stack as a separate change.
+
+## Backend Integration Phase (Active)
+
+The frontend prototype is complete. The repo is now evolving into a working product per `docs/tidal-prd.md` (v2.1). Backend integration is in scope.
+
+### Scope Of Existing Constraints
+
+The "no external API calls / no blockchain / no wallet integrations" rules above apply to **workspace UI and mock-data patterns**. They do not block the backend layer described in the PRD. Specifically:
+
+- Workspace UI should still consume data through provider boundaries in `src/providers/*`.
+- `src/mock-data/*` stays as the seed/fallback path and remains the source of truth for types the UI depends on.
+- New adapters slot behind the existing provider interface so the partner's UI keeps working as real calls come online.
+- Do not couple workspace UI components directly to SDK clients — route through providers or API routes.
+
+### Backend Layout
+
+Per the PRD, new backend code lives at:
+
+- `src/lib/solana/*` — protocol adapters (Kamino, Jupiter Lend, Jito, Sanctum, Jupiter swap, registry, connection)
+- `src/lib/ai/*` — Vercel AI SDK v6 tools, prompts, Solana-specific tool definitions
+- `src/app/api/*` — route handlers for `chat`, `yields`, `solana/rates`, `solana/positions`
+
+Keep route handlers thin. Business logic belongs in `src/lib/*`, not in `app/api/*/route.ts`.
+
+### Stack Additions
+
+- **Wallet/Auth:** Privy with `walletChainType: 'ethereum-and-solana'` (Phantom/Backpack external + embedded wallets)
+- **AI:** Vercel AI SDK v6 + Claude (model IDs per root instructions — default to latest Claude 4.x)
+- **Swaps:** Jupiter Ultra API direct (2-endpoint `/order` → `/execute`, Beam relayer, no RPC needed)
+- **Lending:** `@kamino-finance/klend-sdk`, Jupiter Lend API
+- **Staking:** Jito stake pool (`@jito-foundation/jito-ts-sdk` or direct IX), Sanctum router
+- **Perps/Lending (Phase 2):** `@drift-labs/sdk`
+- **Yield Data:** DeFi Llama Yields API (filter `chain === "Solana"`)
+
+Confirm exact package names against PRD before installing. Do not substitute deprecated alternatives.
+
+### Out Of Scope (Parked From v1)
+
+Do not re-introduce without explicit approval:
+
+- EVM chain configs (Base, Arbitrum, Optimism)
+- Li.Fi SDK (parked for future cross-chain phase)
+- AAVE V3 adapters
+- ERC-4626 vault adapter
+- wagmi hooks (replaced by Solana wallet adapter / Privy Solana hooks)
+
+### Testing Notes
+
+- Mainnet with small amounts. Kamino, Jupiter, and Jito lack reliable devnet deployments.
+- Never commit private keys, RPC URLs with embedded API keys, or Privy app secrets. Use `.env.local` and document required vars in `README.md` as they are added.
+
+### Docs To Keep In Sync
+
+When backend structure changes, update `docs/architecture.md` to reflect the new `src/lib/solana`, `src/lib/ai`, and `src/app/api` surfaces alongside the existing frontend architecture.
