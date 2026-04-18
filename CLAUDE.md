@@ -210,3 +210,21 @@ Do not re-introduce without explicit approval:
 ### Docs To Keep In Sync
 
 When backend structure changes, update `docs/architecture.md` to reflect the new `src/lib/solana`, `src/lib/ai`, and `src/app/api` surfaces alongside the existing frontend architecture.
+
+### Claude Code Skills To Use
+
+When the following skills are available, prefer them over general reasoning for their respective domains:
+
+- **`solana-dev`** — Wallet-standard connection (Phantom/Backpack), Privy Solana integration, `src/lib/solana/*` adapter patterns, and on-chain testing with LiteSVM / Mollusk / Surfpool. This is the testing backbone.
+- **`integrating-jupiter`** — Jupiter Ultra Swap (`/order` → `/execute` via Beam relayer) and Jupiter Lend. Use when touching `src/lib/solana/jupiter-swap.ts` or `src/lib/solana/jupiter-lend.ts`.
+- **`ai-sdk-core`** — Vercel AI SDK v6 tool definitions, streaming, error handling, MCP. Use when touching `src/lib/ai/*` or `src/app/api/chat/route.ts`.
+- **`ai-sdk-ui`** — `useChat` and tool-approval patterns for the workspace chat panel. DeFi actions must require user signature — never auto-execute a transaction from a tool call without an explicit approval step.
+- **`claude-api`** — For direct Anthropic SDK usage and prompt caching. Matters because agent tool-call contexts get long.
+- **`prompt-engineering-patterns`** — When tuning the agent's system prompt and tool descriptions.
+
+Skills explicitly **not** for this repo:
+
+- `wagmi`, `viem`, `ethereum-wingman` — EVM-only, parked from v1
+- `solana-anchor-claude-skill` — we consume existing programs, we don't author Anchor programs
+
+If a skill is not listed here and it looks relevant, check availability before using it — the skill list changes.
