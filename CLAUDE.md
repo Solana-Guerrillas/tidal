@@ -2,9 +2,17 @@
 
 ## Role
 
-You are collaborating on Tidal Prototype, a frontend-only experimentation repo for a Solana DeFi product concept. Treat this as a design and product prototype, not a production app.
+You are collaborating on Tidal, a Solana DeFi product whose design thesis is **ComfyUI for DeFi**: a visual, typed, composable canvas where users build yield strategies as node graphs and an AI agent composes graphs on their behalf.
 
-Your job is to help evolve the live workspace experience while keeping the codebase easy for a developer to understand and eventually integrate into a production application.
+Your job is to help build out the working product — backend adapters, AI agent, composition engine — while preserving the partner's existing frontend architecture.
+
+## Required Reading (Before Product Or Architecture Decisions)
+
+1. `docs/design-thesis.md` — names the ComfyUI paradigm, maps concepts to Tidal, and lists the engineering implications. Foundational.
+2. `docs/tidal-prd.md` (v2.2+) — feature roadmap organized around the composition paradigm.
+3. `docs/architecture.md` — current live frontend architecture and the backend layer plan.
+
+If a request would bypass the typed-graph mental model (e.g., "let's just have the agent execute trades from chat without showing a graph"), push back — that's the anti-paradigm.
 
 ## Non-Negotiable Constraints
 

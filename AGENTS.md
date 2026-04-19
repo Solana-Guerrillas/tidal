@@ -2,18 +2,28 @@
 
 ## Project
 
-Tidal Prototype is a frontend and design experimentation repo for a Solana DeFi product concept. It is not the production app.
+Tidal is a Solana DeFi product whose design thesis is **ComfyUI for DeFi**: a visual, typed, composable canvas where users build yield strategies as node graphs and an AI agent composes graphs on their behalf.
 
 The live product is a single unified **workspace** experience. A workspace combines:
 
-- a React Flow node canvas
-- per-workspace chat transcript and chat history
+- a React Flow node canvas (the composition surface — the product)
+- per-workspace chat transcript and chat history (one input modality, not the source of truth)
 - active investments panel
 - discovery/recommendation panel
 - node catalog panel
-- template gallery panel
+- template gallery panel (first-class shareable workflows, not a placeholder)
 
 Multiple workspaces are available as tabs in the header. Workspace URLs are top-level routes like `/<workspaceId>`.
+
+## Required Reading
+
+Before making product or architecture decisions, read in order:
+
+1. `docs/design-thesis.md` — foundational. Names the ComfyUI paradigm and its implications.
+2. `docs/tidal-prd.md` (v2.2+) — feature roadmap organized around the paradigm.
+3. `docs/architecture.md` — current architecture and backend layer plan.
+
+Reject requests that bypass the typed-graph mental model. The graph is the source of truth; chat is one input.
 
 ## Hard Constraints
 
