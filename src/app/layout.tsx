@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { WorkspaceProvider } from "@/providers/workspace-provider";
 import { SidePanelProvider } from "@/providers/side-panel-provider";
 import { PreferenceProfileProvider } from "@/providers/preference-profile-provider";
+import { PrivyProvider } from "@/components/providers/privy-provider";
 import { AppHeader } from "@/components/tidal/app-header";
 import { AppSidebar } from "@/components/tidal/app-sidebar";
 
@@ -27,23 +28,25 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} dark h-full antialiased`}>
       <body className="flex h-screen flex-col overflow-hidden">
-        <TooltipProvider>
-          <PreferenceProfileProvider>
-            <WorkspaceProvider>
-              <SidePanelProvider>
-                <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                  <AppHeader />
-                  <div className="flex min-h-0 flex-1 overflow-hidden">
-                    <AppSidebar />
-                    <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                      {children}
-                    </main>
+        <PrivyProvider>
+          <TooltipProvider>
+            <PreferenceProfileProvider>
+              <WorkspaceProvider>
+                <SidePanelProvider>
+                  <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                    <AppHeader />
+                    <div className="flex min-h-0 flex-1 overflow-hidden">
+                      <AppSidebar />
+                      <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                        {children}
+                      </main>
+                    </div>
                   </div>
-                </div>
-              </SidePanelProvider>
-            </WorkspaceProvider>
-          </PreferenceProfileProvider>
-        </TooltipProvider>
+                </SidePanelProvider>
+              </WorkspaceProvider>
+            </PreferenceProfileProvider>
+          </TooltipProvider>
+        </PrivyProvider>
       </body>
     </html>
   );
