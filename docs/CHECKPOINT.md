@@ -1,14 +1,16 @@
 # Checkpoint
 
-**Last updated:** 2026-04-19
+**Last updated:** 2026-04-20
 **Branch:** main (clean, pushed to origin)
-**Latest commit:** `48d8d09` — feat(auth): wire Privy + Solana deps and add smoke-test page (P1)
+**Latest commit:** `09f3139` — feat(solana): JitoSOL adapter reads + positions API route (P2 part 1)
 
 ---
 
 ## Where We Are
 
-Phase 1 (Composition Foundation + Two Protocols) is in flight. Docs locked. First real backend code landed. Privy wiring is complete and awaiting a browser smoke test from the user before moving to P2 (JitoSOL adapter).
+Phase 1 (Composition Foundation + Two Protocols) is in flight. Docs locked. **Privy Solana smoke test PASSED** on 2026-04-20 — all 4 gates cleared (page init, login, Solana wallet provisioned, signMessage returned a valid signature). Phase 1 foundation is de-risked; every downstream signing flow can build on this.
+
+JitoSOL read path is live end-to-end (`/api/solana/positions` returns real data from Helius RPC). Next substantive work is the P2 write path: real `readRate` from Jito stake pool state, and `buildTransaction` for stake/unstake.
 
 **ComfyUI-for-DeFi** remains the foundational design thesis. Agent is a *composer*, not an executor. See `docs/design-thesis.md`.
 
@@ -29,6 +31,9 @@ Phase 1 (Composition Foundation + Two Protocols) is in flight. Docs locked. Firs
 
 9. `31a389a` — **E5 ProtocolAdapter scaffolding**. `src/lib/solana/types.ts` + `registry.ts`. Pure TypeScript contract. Every adapter binds to a `NodeCatalogItem.id` and implements `readPosition` / `readRate` / `buildTransaction`. Registry is in-memory.
 10. `48d8d09` — **P1 Privy wiring**. Installed `@privy-io/react-auth@3.22.1` + Solana peers (`@solana/kit`, `@solana-program/{system,token,memo}`). Created `src/components/providers/privy-provider.tsx` with Tidal dark theme + Solana embedded/external wallets. Wired at outermost layer in `layout.tsx`. Added `/privy-smoke` debug page exercising login, wallet listing, and `signMessage` on first Solana wallet.
+11. `8e51d8b` — **GraphMutation + workflow schema** (A2/E3 prep). `src/lib/workspace/mutations.ts` discriminated-union mutations + pure `applyMutations` fold. `src/lib/workspace/workflow-schema.ts` for `tidal.workflow.v1` export/import.
+12. `c31d73d` — **Solana RPC connection factory**. `src/lib/solana/connection.ts` with `server-only` guard, cached `createSolanaRpc` bound to `HELIUS_RPC_URL`.
+13. `09f3139` — **JitoSOL adapter reads + positions API route** (P2 part 1). Real `readPosition` via `getTokenAccountsByOwner`. Stub `readRate`. `buildTransaction` throws until smoke test clears (it has now). `/api/solana/positions` wires the adapter pattern end-to-end. Verified working on 2026-04-20.
 
 ### Key decisions locked
 
@@ -64,34 +69,22 @@ Still empty: `src/lib/ai/*`, `src/app/api/*`.
 
 ## Next Session Starts Here
 
-### Immediate blocker
+### Immediate next work
 
-**User must run the Privy smoke test in a browser.** Steps at `/privy-smoke` after `bun run dev`:
+**P2 write path (JitoSOL stake/unstake):**
 
-1. Page loads without console errors (Privy initialized)
-2. Click "Login" → modal opens → log in with email or connect Phantom/Backpack
-3. After login, a Solana address appears under "Solana wallets"
-4. Click "Sign 'tidal-smoke-test'" → modal asks to sign → approve → hex signature appears
+1. Replace stub `readRate` in `src/lib/solana/jito.ts` with real APY computation — either from Jito stake pool account state (exchange rate delta over epochs) or from Jito's public yield endpoint
+2. Implement `buildTransaction` for JitoSOL stake pool `depositSol` instruction and unstake/withdraw path. Returns base64-encoded `VersionedTransaction`.
+3. Add `/api/solana/build-transaction` route that takes catalogItemId + wallet + widgets, calls `adapter.buildTransaction`, returns the tx
+4. Client flow: user clicks Run on node → hit build-transaction → Privy `useSignTransaction` signs → submit via `sendTransaction` RPC → poll status
+5. Mainnet smoke test: stake 0.01 SOL from the same wallet that passed the smoke test, verify the transaction lands on Solana mainnet
+6. LiteSVM unit tests for `buildTransaction` output shape
 
-If all 4 pass: Phase 1 is de-risked; proceed to P2.
+### Parallel side tracks (can ship anytime)
 
-Common failure modes:
-- Origin error → add `http://localhost:3000` in Privy dashboard (Settings → Domains)
-- Sign fails → likely embedded-wallet config issue in Privy dashboard
-
-### After smoke test passes
-
-**P2 JitoSOL adapter (reads first, writes next)**
-
-1. Create `src/lib/solana/connection.ts` using `HELIUS_RPC_URL` (server-only)
-2. Create `src/lib/solana/jito.ts` implementing `ProtocolAdapter`:
-   - `readPosition` — fetch JitoSOL token balance for a wallet
-   - `readRate` — fetch current JitoSOL APY from Jito stake pool state
-   - `buildTransaction` — stake SOL (`depositSol` IX) and unstake paths
-3. Register via `registerAdapter(...)` in a bootstrap module
-4. Server routes at `src/app/api/solana/positions/route.ts` and `src/app/api/solana/rates/route.ts`
-5. LiteSVM unit tests for `buildTransaction`
-6. Mainnet smoke test — stake 0.01 SOL
+- **E4 type-colored edges** (CSS + React Flow edge styling; palette defaults approved)
+- **A2 `composeStrategy` tool shape** — draft the AI SDK v6 tool that returns `GraphMutation[]`. Pairs with the `GraphMutation` work already committed.
+- **Consider bumping tsconfig target** from ES2017 → ES2022 (enables bigint literals, cleaner async, modern syntax across backend). Low-risk one-liner commit.
 
 ### Parallel side tracks (can start anytime)
 
@@ -105,12 +98,13 @@ Common failure modes:
 - Asset color palette (10-min review by 0xJulo)
 - "Graph appears" animation (10-min decision, fine to ship "just appear")
 
-### Risks unchanged
+### Risks (updated)
 
-1. Privy Solana embedded wallet maturity — addressed by the pending smoke test
+1. ~~Privy Solana embedded wallet maturity~~ — **RESOLVED 2026-04-20 by smoke test**
 2. Kamino SDK docs quality — test when we get to P3 in Week 3
-3. AI SDK v6 tool-call → graph mutation pattern — prove with hello-world in Week 1 after smoke test passes
+3. AI SDK v6 tool-call → graph mutation pattern — `GraphMutation` type and `applyMutations` helper are committed; still need to prove the wire with a hello-world AI tool
 4. Mainnet testing costs time — budgeted
+5. **New:** Privy `signTransaction` hook behavior — `signMessage` works, but full Solana transaction signing + submission may surface additional quirks. De-risk early in P2 write path.
 
 ## Useful Pointers
 
