@@ -75,7 +75,7 @@ async function readPosition(
     return null;
   }
 
-  let totalRaw = BigInt(0);
+  let totalRaw = 0n;
   let decimals = 9;
   for (const entry of accounts) {
     const parsed = entry.account.data as {
@@ -119,7 +119,7 @@ function formatTokenAmount(
   decimals: number,
   precision: number,
 ): string {
-  const divisor = BigInt(10) ** BigInt(decimals);
+  const divisor = 10n ** BigInt(decimals);
   const whole = raw / divisor;
   const remainder = raw % divisor;
   const remainderStr = remainder.toString().padStart(decimals, "0");
