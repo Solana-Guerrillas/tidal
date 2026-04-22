@@ -142,11 +142,6 @@ async function buildTransaction(
     fromPubkey,
     Number(lamports),
   );
-  if (signers.length > 0) {
-    throw new Error(
-      `JitoSOL depositSol returned ${signers.length} ephemeral signers; server-side signing not supported yet`,
-    );
-  }
 
   const { blockhash } = await connection.getLatestBlockhash("confirmed");
   const message = new TransactionMessage({
@@ -155,6 +150,15 @@ async function buildTransaction(
     instructions,
   }).compileToV0Message();
   const tx = new VersionedTransaction(message);
+
+  // The SPL stake pool depositSol helper routes funds through a fresh
+  // ephemeral SOL account. That account signs the intermediate hop but
+  // the user still signs for the fee-payer slot. We partial-sign here
+  // so the client only has to add the user's signature via Privy.
+  if (signers.length > 0) {
+    tx.sign(signers);
+  }
+
   const transactionBase64 = Buffer.from(tx.serialize()).toString("base64");
 
   const warnings: string[] = [];
