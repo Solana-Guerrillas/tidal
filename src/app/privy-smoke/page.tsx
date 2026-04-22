@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import bs58 from "bs58";
 import { usePrivy } from "@privy-io/react-auth";
 import {
-  useSignAndSendTransaction,
   useSignMessage,
+  useSignTransaction,
   useWallets,
 } from "@privy-io/react-auth/solana";
 
@@ -25,7 +24,7 @@ export default function PrivySmokePage() {
   const { ready, authenticated, user, login, logout } = usePrivy();
   const { wallets } = useWallets();
   const { signMessage } = useSignMessage();
-  const { signAndSendTransaction } = useSignAndSendTransaction();
+  const { signTransaction } = useSignTransaction();
 
   const [signature, setSignature] = useState<string | null>(null);
   const [signError, setSignError] = useState<string | null>(null);
@@ -96,11 +95,38 @@ export default function PrivySmokePage() {
         txBytes[i] = binary.charCodeAt(i);
       }
 
-      const result = await signAndSendTransaction({
+      const signed = await signTransaction({
         transaction: txBytes,
         wallet,
       });
-      setStakeTxSig(bs58.encode(result.signature));
+
+      let signedBase64 = "";
+      const chunkSize = 0x8000;
+      for (let i = 0; i < signed.signedTransaction.length; i += chunkSize) {
+        signedBase64 += String.fromCharCode(
+          ...signed.signedTransaction.subarray(i, i + chunkSize),
+        );
+      }
+      signedBase64 = btoa(signedBase64);
+
+      const submitResp = await fetch("/api/solana/submit-transaction", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transactionBase64: signedBase64 }),
+      });
+      const submitData = (await submitResp.json()) as {
+        signature?: string;
+        error?: string;
+        detail?: string;
+      };
+      if (!submitResp.ok || !submitData.signature) {
+        throw new Error(
+          submitData.detail ||
+            submitData.error ||
+            `submit returned ${submitResp.status}`,
+        );
+      }
+      setStakeTxSig(submitData.signature);
     } catch (err) {
       setStakeError(err instanceof Error ? err.message : String(err));
     } finally {
