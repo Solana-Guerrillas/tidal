@@ -45,7 +45,44 @@ export async function POST(request: Request): Promise<NextResponse> {
       skipPreflight: skipPreflight === true,
       maxRetries: 3,
     });
-    return NextResponse.json({ signature });
+
+    // Poll for confirmation so downstream work (e.g., the next node in a
+    // multi-step graph) sees the resulting on-chain state. Without this,
+    // a swap + supply pipeline would race - the supply's balance check
+    // would run against pre-swap state.
+    const deadline = Date.now() + 30_000;
+    let confirmedError: unknown = null;
+    while (Date.now() < deadline) {
+      const status = await connection.getSignatureStatus(signature);
+      const value = status.value;
+      if (value?.err) {
+        confirmedError = value.err;
+        break;
+      }
+      const cs = value?.confirmationStatus;
+      if (cs === "confirmed" || cs === "finalized") {
+        return NextResponse.json({ signature, confirmationStatus: cs });
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+
+    if (confirmedError !== null) {
+      return NextResponse.json(
+        {
+          error: "transaction failed on-chain",
+          detail: JSON.stringify(confirmedError),
+          signature,
+        },
+        { status: 500 },
+      );
+    }
+    return NextResponse.json(
+      {
+        error: "confirmation timeout (30s)",
+        signature,
+      },
+      { status: 504 },
+    );
   } catch (err) {
     return NextResponse.json(
       {
