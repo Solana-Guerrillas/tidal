@@ -78,7 +78,7 @@ export type ProtocolAdapter = {
   widgets: WidgetSchema[];
   protocol: ProtocolMetadata;
   readPosition(params: ReadPositionParams): Promise<PositionSnapshot | null>;
-  readRate(): Promise<APYQuote>;
+  readRate(): Promise<APYQuote | null>;
   buildTransaction(
     params: BuildTransactionParams,
   ): Promise<BuildTransactionResult>;

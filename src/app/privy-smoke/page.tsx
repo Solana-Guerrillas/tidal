@@ -14,6 +14,9 @@ const STAKE_LAMPORTS = "10000000"; // 0.01 SOL
 const KAMINO_CATALOG_ITEM_ID = "kamino-usdc-supply";
 const SUPPLY_USDC_RAW = "1000000"; // 1 USDC (6 decimals)
 
+const JUPITER_SWAP_CATALOG_ITEM_ID = "jupiter-swap-sol-usdc";
+const SWAP_LAMPORTS = "10000000"; // 0.01 SOL
+
 type BuildTransactionResponse = {
   transactionBase64?: string;
   expectedOutputAmount?: string;
@@ -73,6 +76,9 @@ export default function PrivySmokePage() {
     initialRunState,
   );
   const [supplyState, setSupplyState] = useState<AdapterRunState>(
+    initialRunState,
+  );
+  const [swapState, setSwapState] = useState<AdapterRunState>(
     initialRunState,
   );
 
@@ -274,6 +280,18 @@ export default function PrivySmokePage() {
           state={supplyState}
           onRun={() =>
             run(setSupplyState, KAMINO_CATALOG_ITEM_ID, SUPPLY_USDC_RAW)
+          }
+        />
+      )}
+
+      {authenticated && wallets.length > 0 && (
+        <AdapterRunSection
+          title="Swap 0.01 SOL → USDC via Jupiter Ultra (MAINNET)"
+          buttonLabel="Swap 0.01 SOL to USDC"
+          busyLabel="Swapping…"
+          state={swapState}
+          onRun={() =>
+            run(setSwapState, JUPITER_SWAP_CATALOG_ITEM_ID, SWAP_LAMPORTS)
           }
         />
       )}
