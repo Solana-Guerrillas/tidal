@@ -1,8 +1,8 @@
 # Checkpoint
 
-**Last updated:** 2026-04-21
+**Last updated:** 2026-04-22
 **Branch:** main (clean, pushed to origin)
-**Latest commit:** `f3b9dbe` — refactor: proxy RPC through server + use sign-only flow (prod architecture)
+**Latest commit:** `44061e0` — feat(solana): Kamino USDC supply write path + mainnet supply UI (P3 part 2)
 
 ---
 
@@ -10,7 +10,9 @@
 
 Phase 1 (Composition Foundation + Two Protocols) is in flight. Docs locked. **Privy Solana smoke test PASSED** on 2026-04-20 — all 4 gates cleared (page init, login, Solana wallet provisioned, signMessage returned a valid signature).
 
-**🎉 P2 JitoSOL write path LANDED ON MAINNET on 2026-04-21.** Staked 0.01 SOL → received 0.0078 JitoSOL (tx signature `5TERmKWNBNHai62GCB22mJhYTyZDioCdrBMLLQwmYzwhRr7NU91Au9VUFjG4SNtNEWrwHJ2efbLtXcntzppQDx2c`, wallet `BdPGUFcYUQ2FsLqjit9BKhccwUvpzeMFwhJvNs2y5pLa`). Position verified via `/api/solana/positions`. The entire build-sign-submit architecture is proven and generalizes to every future adapter.
+**🎉 P2 JitoSOL write path LANDED ON MAINNET on 2026-04-21.** Staked 0.01 SOL → 0.0078 JitoSOL (tx `5TERmKWN...`).
+
+**🎉 P3 Kamino USDC supply path LANDED ON MAINNET on 2026-04-22.** Supplied 1 USDC to Kamino main market (tx `4RxYqWUSbjfCuZoTNAr8aMjVtQmh1mFtZ3rqRA6qfBEivRaqnDy1ZmgFKX9GJRfGFAHgTy7AG4EeSvduHZc4DV1c`). The `ProtocolAdapter` contract is now validated across two different protocol shapes (staking + lending). Single-node end-to-end mainnet execution is fully proven.
 
 **ComfyUI-for-DeFi** remains the foundational design thesis. Agent is a *composer*, not an executor. See `docs/design-thesis.md`.
 
