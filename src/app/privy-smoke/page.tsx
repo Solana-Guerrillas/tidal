@@ -9,7 +9,10 @@ import {
 } from "@privy-io/react-auth/solana";
 
 const JITO_CATALOG_ITEM_ID = "jito-sol-stake";
-const STAKE_LAMPORTS = "10000000";
+const STAKE_LAMPORTS = "10000000"; // 0.01 SOL
+
+const KAMINO_CATALOG_ITEM_ID = "kamino-usdc-supply";
+const SUPPLY_USDC_RAW = "1000000"; // 1 USDC (6 decimals)
 
 type BuildTransactionResponse = {
   transactionBase64?: string;
@@ -20,6 +23,43 @@ type BuildTransactionResponse = {
   detail?: string;
 };
 
+type SubmitResponse = {
+  signature?: string;
+  error?: string;
+  detail?: string;
+};
+
+type TxRunResult = { signature: string; warnings: string[] };
+
+type AdapterRunState = {
+  txSig: string | null;
+  warnings: string[];
+  error: string | null;
+  busy: boolean;
+};
+
+function initialRunState(): AdapterRunState {
+  return { txSig: null, warnings: [], error: null, busy: false };
+}
+
+function uint8ArrayToBase64(bytes: Uint8Array): string {
+  let out = "";
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    out += String.fromCharCode(...bytes.subarray(i, i + chunk));
+  }
+  return btoa(out);
+}
+
+function base64ToUint8Array(b64: string): Uint8Array {
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
 export default function PrivySmokePage() {
   const { ready, authenticated, user, login, logout } = usePrivy();
   const { wallets } = useWallets();
@@ -29,10 +69,12 @@ export default function PrivySmokePage() {
   const [signature, setSignature] = useState<string | null>(null);
   const [signError, setSignError] = useState<string | null>(null);
 
-  const [stakeTxSig, setStakeTxSig] = useState<string | null>(null);
-  const [stakeWarnings, setStakeWarnings] = useState<string[]>([]);
-  const [stakeError, setStakeError] = useState<string | null>(null);
-  const [staking, setStaking] = useState(false);
+  const [stakeState, setStakeState] = useState<AdapterRunState>(
+    initialRunState,
+  );
+  const [supplyState, setSupplyState] = useState<AdapterRunState>(
+    initialRunState,
+  );
 
   const handleSign = async () => {
     setSignError(null);
@@ -56,81 +98,81 @@ export default function PrivySmokePage() {
     }
   };
 
-  const handleStake = async () => {
-    setStakeError(null);
-    setStakeTxSig(null);
-    setStakeWarnings([]);
+  const runAdapterTx = async (
+    catalogItemId: string,
+    inputAmount: string,
+  ): Promise<TxRunResult> => {
     const wallet = wallets[0];
     if (!wallet) {
-      setStakeError("No Solana wallet connected.");
-      return;
+      throw new Error("No Solana wallet connected.");
     }
-    setStaking(true);
+
+    const buildResp = await fetch("/api/solana/build-transaction", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        catalogItemId,
+        walletPublicKey: wallet.address,
+        inputAmount,
+      }),
+    });
+    const buildData = (await buildResp.json()) as BuildTransactionResponse;
+    if (!buildResp.ok) {
+      throw new Error(
+        buildData.detail || buildData.error || `HTTP ${buildResp.status}`,
+      );
+    }
+    if (!buildData.transactionBase64) {
+      throw new Error("response missing transactionBase64");
+    }
+
+    const signed = await signTransaction({
+      transaction: base64ToUint8Array(buildData.transactionBase64),
+      wallet,
+    });
+    const signedBase64 = uint8ArrayToBase64(signed.signedTransaction);
+
+    const submitResp = await fetch("/api/solana/submit-transaction", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ transactionBase64: signedBase64 }),
+    });
+    const submitData = (await submitResp.json()) as SubmitResponse;
+    if (!submitResp.ok || !submitData.signature) {
+      throw new Error(
+        submitData.detail ||
+          submitData.error ||
+          `submit returned ${submitResp.status}`,
+      );
+    }
+
+    return {
+      signature: submitData.signature,
+      warnings: buildData.warnings ?? [],
+    };
+  };
+
+  const run = async (
+    setState: typeof setStakeState,
+    catalogItemId: string,
+    inputAmount: string,
+  ) => {
+    setState({ txSig: null, warnings: [], error: null, busy: true });
     try {
-      const buildResp = await fetch("/api/solana/build-transaction", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          catalogItemId: JITO_CATALOG_ITEM_ID,
-          walletPublicKey: wallet.address,
-          inputAmount: STAKE_LAMPORTS,
-        }),
+      const result = await runAdapterTx(catalogItemId, inputAmount);
+      setState({
+        txSig: result.signature,
+        warnings: result.warnings,
+        error: null,
+        busy: false,
       });
-      const buildData = (await buildResp.json()) as BuildTransactionResponse;
-      if (!buildResp.ok) {
-        throw new Error(
-          buildData.detail || buildData.error || `HTTP ${buildResp.status}`,
-        );
-      }
-      if (!buildData.transactionBase64) {
-        throw new Error("response missing transactionBase64");
-      }
-      if (buildData.warnings && buildData.warnings.length > 0) {
-        setStakeWarnings(buildData.warnings);
-      }
-
-      const binary = atob(buildData.transactionBase64);
-      const txBytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) {
-        txBytes[i] = binary.charCodeAt(i);
-      }
-
-      const signed = await signTransaction({
-        transaction: txBytes,
-        wallet,
-      });
-
-      let signedBase64 = "";
-      const chunkSize = 0x8000;
-      for (let i = 0; i < signed.signedTransaction.length; i += chunkSize) {
-        signedBase64 += String.fromCharCode(
-          ...signed.signedTransaction.subarray(i, i + chunkSize),
-        );
-      }
-      signedBase64 = btoa(signedBase64);
-
-      const submitResp = await fetch("/api/solana/submit-transaction", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ transactionBase64: signedBase64 }),
-      });
-      const submitData = (await submitResp.json()) as {
-        signature?: string;
-        error?: string;
-        detail?: string;
-      };
-      if (!submitResp.ok || !submitData.signature) {
-        throw new Error(
-          submitData.detail ||
-            submitData.error ||
-            `submit returned ${submitResp.status}`,
-        );
-      }
-      setStakeTxSig(submitData.signature);
     } catch (err) {
-      setStakeError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setStaking(false);
+      setState({
+        txSig: null,
+        warnings: [],
+        error: err instanceof Error ? err.message : String(err),
+        busy: false,
+      });
     }
   };
 
@@ -215,47 +257,74 @@ export default function PrivySmokePage() {
       )}
 
       {authenticated && wallets.length > 0 && (
-        <section className="flex flex-col gap-2">
-          <h2 className="opacity-60">
-            Stake test — 0.01 SOL → JitoSOL via Jito stake pool (MAINNET)
-          </h2>
-          <p className="opacity-60">
-            Uses the JitoSOL adapter&apos;s buildTransaction + Privy
-            signAndSendTransaction. Submits a real mainnet transaction for
-            0.01 SOL. Cancelable in the Privy modal.
-          </p>
-          <button
-            disabled={staking}
-            className="w-fit rounded border border-white/30 px-3 py-1 hover:bg-white/5 disabled:opacity-50"
-            onClick={handleStake}
-          >
-            {staking ? "Staking…" : "Stake 0.01 SOL with Jito"}
-          </button>
-          {stakeWarnings.length > 0 && (
-            <ul className="flex flex-col gap-1 text-amber-400">
-              {stakeWarnings.map((w, i) => (
-                <li key={i}>warning: {w}</li>
-              ))}
-            </ul>
-          )}
-          {stakeTxSig && (
-            <div className="flex flex-col gap-1 text-emerald-400">
-              <div className="break-all">tx signature: {stakeTxSig}</div>
-              <a
-                className="underline hover:text-emerald-300"
-                href={`https://solscan.io/tx/${stakeTxSig}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                view on solscan ↗
-              </a>
-            </div>
-          )}
-          {stakeError && (
-            <div className="text-red-400">error: {stakeError}</div>
-          )}
-        </section>
+        <AdapterRunSection
+          title="Stake 0.01 SOL → JitoSOL via Jito stake pool (MAINNET)"
+          buttonLabel="Stake 0.01 SOL with Jito"
+          busyLabel="Staking…"
+          state={stakeState}
+          onRun={() => run(setStakeState, JITO_CATALOG_ITEM_ID, STAKE_LAMPORTS)}
+        />
+      )}
+
+      {authenticated && wallets.length > 0 && (
+        <AdapterRunSection
+          title="Supply 1 USDC → Kamino main market (MAINNET)"
+          buttonLabel="Supply 1 USDC to Kamino"
+          busyLabel="Supplying…"
+          state={supplyState}
+          onRun={() =>
+            run(setSupplyState, KAMINO_CATALOG_ITEM_ID, SUPPLY_USDC_RAW)
+          }
+        />
       )}
     </div>
+  );
+}
+
+function AdapterRunSection({
+  title,
+  buttonLabel,
+  busyLabel,
+  state,
+  onRun,
+}: {
+  title: string;
+  buttonLabel: string;
+  busyLabel: string;
+  state: AdapterRunState;
+  onRun: () => void;
+}) {
+  return (
+    <section className="flex flex-col gap-2">
+      <h2 className="opacity-60">{title}</h2>
+      <button
+        disabled={state.busy}
+        className="w-fit rounded border border-white/30 px-3 py-1 hover:bg-white/5 disabled:opacity-50"
+        onClick={onRun}
+      >
+        {state.busy ? busyLabel : buttonLabel}
+      </button>
+      {state.warnings.length > 0 && (
+        <ul className="flex flex-col gap-1 text-amber-400">
+          {state.warnings.map((w, i) => (
+            <li key={i}>warning: {w}</li>
+          ))}
+        </ul>
+      )}
+      {state.txSig && (
+        <div className="flex flex-col gap-1 text-emerald-400">
+          <div className="break-all">tx signature: {state.txSig}</div>
+          <a
+            className="underline hover:text-emerald-300"
+            href={`https://solscan.io/tx/${state.txSig}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            view on solscan ↗
+          </a>
+        </div>
+      )}
+      {state.error && <div className="text-red-400">error: {state.error}</div>}
+    </section>
   );
 }
