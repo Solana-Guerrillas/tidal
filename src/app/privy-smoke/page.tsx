@@ -4,9 +4,10 @@ import { useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import {
   useSignMessage,
-  useSignTransaction,
   useWallets,
 } from "@privy-io/react-auth/solana";
+
+import { useAdapterNodeRunner } from "@/hooks/workspace/use-adapter-node-runner";
 
 const JITO_CATALOG_ITEM_ID = "jito-sol-stake";
 const STAKE_LAMPORTS = "10000000"; // 0.01 SOL
@@ -17,57 +18,21 @@ const SUPPLY_USDC_RAW = "1000000"; // 1 USDC (6 decimals)
 const JUPITER_SWAP_CATALOG_ITEM_ID = "jupiter-swap-sol-usdc";
 const SWAP_LAMPORTS = "10000000"; // 0.01 SOL
 
-type BuildTransactionResponse = {
-  transactionBase64?: string;
-  expectedOutputAmount?: string;
-  fees?: { networkLamports?: string; priorityLamports?: string };
-  warnings?: string[];
-  error?: string;
-  detail?: string;
-};
-
-type SubmitResponse = {
-  signature?: string;
-  error?: string;
-  detail?: string;
-};
-
-type TxRunResult = { signature: string; warnings: string[] };
-
 type AdapterRunState = {
   txSig: string | null;
-  warnings: string[];
   error: string | null;
   busy: boolean;
 };
 
 function initialRunState(): AdapterRunState {
-  return { txSig: null, warnings: [], error: null, busy: false };
-}
-
-function uint8ArrayToBase64(bytes: Uint8Array): string {
-  let out = "";
-  const chunk = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunk) {
-    out += String.fromCharCode(...bytes.subarray(i, i + chunk));
-  }
-  return btoa(out);
-}
-
-function base64ToUint8Array(b64: string): Uint8Array {
-  const binary = atob(b64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-  return bytes;
+  return { txSig: null, error: null, busy: false };
 }
 
 export default function PrivySmokePage() {
   const { ready, authenticated, user, login, logout } = usePrivy();
   const { wallets } = useWallets();
   const { signMessage } = useSignMessage();
-  const { signTransaction } = useSignTransaction();
+  const runNode = useAdapterNodeRunner();
 
   const [signature, setSignature] = useState<string | null>(null);
   const [signError, setSignError] = useState<string | null>(null);
@@ -104,78 +69,25 @@ export default function PrivySmokePage() {
     }
   };
 
-  const runAdapterTx = async (
-    catalogItemId: string,
-    inputAmount: string,
-  ): Promise<TxRunResult> => {
-    const wallet = wallets[0];
-    if (!wallet) {
-      throw new Error("No Solana wallet connected.");
-    }
-
-    const buildResp = await fetch("/api/solana/build-transaction", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        catalogItemId,
-        walletPublicKey: wallet.address,
-        inputAmount,
-      }),
-    });
-    const buildData = (await buildResp.json()) as BuildTransactionResponse;
-    if (!buildResp.ok) {
-      throw new Error(
-        buildData.detail || buildData.error || `HTTP ${buildResp.status}`,
-      );
-    }
-    if (!buildData.transactionBase64) {
-      throw new Error("response missing transactionBase64");
-    }
-
-    const signed = await signTransaction({
-      transaction: base64ToUint8Array(buildData.transactionBase64),
-      wallet,
-    });
-    const signedBase64 = uint8ArrayToBase64(signed.signedTransaction);
-
-    const submitResp = await fetch("/api/solana/submit-transaction", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ transactionBase64: signedBase64 }),
-    });
-    const submitData = (await submitResp.json()) as SubmitResponse;
-    if (!submitResp.ok || !submitData.signature) {
-      throw new Error(
-        submitData.detail ||
-          submitData.error ||
-          `submit returned ${submitResp.status}`,
-      );
-    }
-
-    return {
-      signature: submitData.signature,
-      warnings: buildData.warnings ?? [],
-    };
-  };
-
   const run = async (
     setState: typeof setStakeState,
     catalogItemId: string,
     inputAmount: string,
   ) => {
-    setState({ txSig: null, warnings: [], error: null, busy: true });
+    setState({ txSig: null, error: null, busy: true });
     try {
-      const result = await runAdapterTx(catalogItemId, inputAmount);
-      setState({
-        txSig: result.signature,
-        warnings: result.warnings,
-        error: null,
-        busy: false,
+      const result = await runNode({
+        node: {
+          id: `smoke-${catalogItemId}`,
+          catalogItemId,
+          widgets: {},
+        },
+        inputAmount: BigInt(inputAmount),
       });
+      setState({ txSig: result.txSignature, error: null, busy: false });
     } catch (err) {
       setState({
         txSig: null,
-        warnings: [],
         error: err instanceof Error ? err.message : String(err),
         busy: false,
       });
@@ -322,13 +234,6 @@ function AdapterRunSection({
       >
         {state.busy ? busyLabel : buttonLabel}
       </button>
-      {state.warnings.length > 0 && (
-        <ul className="flex flex-col gap-1 text-amber-400">
-          {state.warnings.map((w, i) => (
-            <li key={i}>warning: {w}</li>
-          ))}
-        </ul>
-      )}
       {state.txSig && (
         <div className="flex flex-col gap-1 text-emerald-400">
           <div className="break-all">tx signature: {state.txSig}</div>
