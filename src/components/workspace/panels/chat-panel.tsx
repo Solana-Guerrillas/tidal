@@ -1,14 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChatCircle, Plus } from "@phosphor-icons/react";
+import { useChat } from "@ai-sdk/react";
 
 import { ChatMessage } from "@/components/tidal/chat-message";
 import { PromptComposer } from "@/components/tidal/prompt-composer";
 import { PanelShell } from "@/components/workspace/panels/panel-shell";
+import { StrategyComposeMessage } from "@/components/workspace/strategy-compose-message";
 import { cn } from "@/lib/utils";
 import { useWorkspace } from "@/providers/workspace-provider";
 import type { WorkspaceThread } from "@/mock-data/workspace/types";
+import type { ComposeStrategyOutput } from "@/lib/ai/tools/compose-strategy";
 
 type ChatPanelProps = {
   activeThread: WorkspaceThread;
@@ -17,16 +20,52 @@ type ChatPanelProps = {
   onClose: () => void;
 };
 
+type ToolPart = {
+  type: string;
+  state?: string;
+  output?: unknown;
+  errorText?: string;
+  toolCallId?: string;
+};
+
 export function ChatPanel({
   activeThread,
   threads,
   onSelectThread,
   onClose,
 }: ChatPanelProps) {
-  const { createBlankThread } = useWorkspace();
+  const { createBlankThread, applyGraphMutations } = useWorkspace();
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [composerValue, setComposerValue] = useState("");
+  const { messages, sendMessage, status } = useChat();
+  const appliedToolCallIds = useRef<Set<string>>(new Set());
 
-  const orderedMessages = [...activeThread.messages].reverse();
+  // Apply composed-strategy mutations to the active workspace exactly once
+  // per tool call. Side-effecting in render is wrong; an effect tied to
+  // messages catches every output-available transition without re-applying
+  // on subsequent renders.
+  useEffect(() => {
+    for (const message of messages) {
+      for (const part of message.parts as ToolPart[]) {
+        if (
+          part.type !== "tool-composeStrategy" ||
+          part.state !== "output-available" ||
+          !part.toolCallId ||
+          appliedToolCallIds.current.has(part.toolCallId)
+        ) {
+          continue;
+        }
+        const output = part.output as ComposeStrategyOutput | undefined;
+        if (!output) continue;
+        applyGraphMutations(output.mutations);
+        appliedToolCallIds.current.add(part.toolCallId);
+      }
+    }
+  }, [messages, applyGraphMutations]);
+
+  const isBusy = status === "submitted" || status === "streaming";
+
+  const orderedMessages = [...messages].reverse();
 
   return (
     <PanelShell
@@ -93,14 +132,61 @@ export function ChatPanel({
 
         <div className="flex min-h-0 flex-1 flex-col-reverse gap-4 overflow-y-auto pr-1">
           {orderedMessages.map((message) => (
-            <ChatMessage key={message.id} role={message.role}>
-              {message.content}
-            </ChatMessage>
+            <div key={message.id} className="flex flex-col gap-2">
+              {message.parts.map((part, partIndex) => {
+                if (part.type === "text") {
+                  return (
+                    <ChatMessage
+                      key={partIndex}
+                      role={message.role === "user" ? "user" : "ai"}
+                    >
+                      {part.text}
+                    </ChatMessage>
+                  );
+                }
+                if (part.type === "tool-composeStrategy") {
+                  const toolPart = part as ToolPart;
+                  if (toolPart.state === "output-available" && toolPart.output) {
+                    return (
+                      <StrategyComposeMessage
+                        key={partIndex}
+                        output={toolPart.output as ComposeStrategyOutput}
+                      />
+                    );
+                  }
+                  if (toolPart.state === "output-error") {
+                    return (
+                      <ChatMessage key={partIndex} role="ai">
+                        Strategy compose failed:{" "}
+                        {toolPart.errorText ?? "unknown error"}
+                      </ChatMessage>
+                    );
+                  }
+                  return (
+                    <ChatMessage key={partIndex} role="ai">
+                      Composing strategy…
+                    </ChatMessage>
+                  );
+                }
+                return null;
+              })}
+            </div>
           ))}
         </div>
 
         <div className="mt-4 shrink-0">
-          <PromptComposer className="w-full" />
+          <PromptComposer
+            className="w-full"
+            value={composerValue}
+            onValueChange={setComposerValue}
+            placeholder={
+              isBusy ? "Tidal is thinking…" : "Ask Tidal to compose a strategy"
+            }
+            onSubmit={({ value }) => {
+              sendMessage({ text: value });
+              setComposerValue("");
+            }}
+          />
         </div>
       </div>
     </PanelShell>

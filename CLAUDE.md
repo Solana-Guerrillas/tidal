@@ -142,7 +142,7 @@ When adding behavior:
 - Do not couple UI components directly to future backend assumptions.
 - Do not add placeholder production clients.
 
-The chat composer is presentational/prototype-level. Production chat behavior will be connected later outside this prototype.
+The workspace chat panel is now wired to `/api/chat` via `useChat` from `@ai-sdk/react`. When the agent calls `composeStrategy`, the panel applies the returned mutations to the active workspace via `WorkspaceProvider.applyGraphMutations` and renders a `StrategyComposeMessage` bubble with a "Run graph" button that drives `executeGraph` end-to-end.
 
 ## Docs Maintenance
 
@@ -167,7 +167,42 @@ Note: the current build may require network access because `next/font/google` fe
 
 ## Backend Integration Phase (Active)
 
-The frontend prototype is complete. The repo is now evolving into a working product per `docs/tidal-prd.md` (v2.1). Backend integration is in scope.
+The frontend prototype is complete. The repo is now evolving into a working product per `docs/tidal-prd.md` (v2.2). Backend integration is in scope.
+
+### Phase 1 Progress Snapshot
+
+Always read `docs/CHECKPOINT.md` for the current status — it's the source of truth. Quick orientation as of 2026-04-25:
+
+**Landed and mainnet-verified:**
+- `E5` ProtocolAdapter contract (`src/lib/solana/types.ts`, `registry.ts`)
+- `P1` Privy Solana wallet (embedded + external, dark theme)
+- `P2` JitoSOL stake adapter
+- `P3` Kamino USDC supply adapter
+- `P4` Jupiter Ultra SOL→USDC swap adapter
+- `E1` Graph execution engine (`src/lib/workspace/graph-exec.ts`, `useAdapterNodeRunner`) — runs multi-node pipelines on mainnet
+
+**Landed (smoke-verified, not yet wired into the workspace UI):**
+- `A1` `/api/chat` streaming with AI SDK v6 + Claude Sonnet 4.6
+- `A2` `composeStrategy` tool — three canonical intents: `liquid-stake-sol`, `lend-usdc-kamino`, `swap-sol-then-supply-usdc`. Returns `{ summary, mutations, executable }`.
+
+**Active surface — workspace chat panel wire (next):**
+- Replace the presentational composer with real `useChat`
+- Apply tool-returned `GraphMutation[]` to the active workspace via `WorkspaceProvider`
+- Add a run-graph affordance that derives `ExecutableNode[]` from workspace state and feeds `executeGraph` via `useAdapterNodeRunner`
+- Bridge: `WorkspaceGraphNode` doesn't carry `catalogItemId` today. The intended fix is to add an optional `catalogItemId` to `StrategyNodeData` so any strategy node (composed or hand-built) is runnable.
+
+**Remaining for the Phase 1 thesis demo:**
+- The workspace chat panel wire (above) — turns the smoke-page demo into the actual product surface
+- `E2` widget editing on nodes (per-adapter input forms)
+- Polish: real `readRate` for Jito, real `readPosition` for Kamino obligations, bidirectional Jupiter swap
+
+**Out of scope (parked from v1):** EVM chains, Li.Fi, AAVE, ERC-4626, wagmi.
+
+### Important Architectural Notes
+
+- **Visual catalog vs. executable adapters are disjoint.** `src/mock-data/workspace/catalog.ts` (UI picker) does not list the registered adapter IDs (`jito-sol-stake`, `kamino-usdc-supply`, `jupiter-swap-sol-usdc`). The compose-strategy tool synthesizes nodes by reading `getAdapter(id).catalogItem` server-side rather than requiring the visual catalog to be in sync. Keep this in mind before "fixing" the catalog mismatch — it's intentional until the workspace chat wire decides whether to extend `StrategyNodeData` with `catalogItemId`.
+- **Adapters must be registered before use.** Server entry points call `registerAllAdapters()` (idempotent). Don't import individual adapters into UI code; go through the registry.
+- **Workspace chat panel is wired live** to `/api/chat`. `ChatPanel` uses `useChat`; `composeStrategy` tool results stream in as `tool-composeStrategy` parts, mutations are applied to the active workspace via `WorkspaceProvider.applyGraphMutations` (deduped per `toolCallId` in an effect), and the resulting `StrategyComposeMessage` carries the "Run graph" affordance.
 
 ### Scope Of Existing Constraints
 

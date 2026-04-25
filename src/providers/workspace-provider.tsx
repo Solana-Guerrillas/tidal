@@ -21,6 +21,10 @@ import type {
   WorkspaceKind,
   WorkspaceThread,
 } from "@/mock-data/workspace/types";
+import {
+  applyMutationsToWorkspace,
+  type GraphMutation,
+} from "@/lib/workspace/mutations";
 
 type CreateWorkspaceInput = {
   name?: string;
@@ -40,6 +44,10 @@ type WorkspaceContextValue = {
     nodes: WorkspaceGraphNode[],
     edges: WorkspaceGraphEdge[]
   ) => void;
+  applyGraphMutations: (
+    mutations: GraphMutation[],
+    workspaceId?: string
+  ) => { warnings: string[] };
   updateWorkspaceMeta: (
     workspaceId: string,
     updates: Partial<
@@ -210,6 +218,32 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     []
   );
 
+  const applyGraphMutations = useCallback(
+    (
+      mutations: GraphMutation[],
+      workspaceId?: string
+    ): { warnings: string[] } => {
+      const targetWorkspaceId = workspaceId ?? activeWorkspaceId;
+      if (!targetWorkspaceId) {
+        return { warnings: ["no active workspace"] };
+      }
+
+      const collectedWarnings: string[] = [];
+      setWorkspaces((currentWorkspaces) =>
+        currentWorkspaces.map((workspace) => {
+          if (workspace.id !== targetWorkspaceId) {
+            return workspace;
+          }
+          const result = applyMutationsToWorkspace(workspace, mutations);
+          collectedWarnings.push(...result.warnings);
+          return result.workspace;
+        })
+      );
+      return { warnings: collectedWarnings };
+    },
+    [activeWorkspaceId]
+  );
+
   const updateWorkspaceMeta = useCallback(
     (
       workspaceId: string,
@@ -291,6 +325,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       createWorkspace,
       closeWorkspace,
       updateWorkspaceGraph,
+      applyGraphMutations,
       updateWorkspaceMeta,
       setActiveThreadId,
       createBlankThread,
@@ -304,6 +339,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       createWorkspace,
       closeWorkspace,
       updateWorkspaceGraph,
+      applyGraphMutations,
       updateWorkspaceMeta,
       setActiveThreadId,
       createBlankThread,

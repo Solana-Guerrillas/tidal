@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-04-25
 **Branch:** main (clean, pushed to origin)
-**Latest commit:** A2 composeStrategy tool
+**Latest commit:** Workspace chat panel wired to composeStrategy + run-graph button
 
 ---
 
@@ -34,7 +34,15 @@ Engine architecture: pure topological sort + state machine + async generator (`g
 - Smoke UI in `/privy-smoke` renders `tool-composeStrategy` parts: shows the streaming state, the composed summary, the resulting graph state from `applyMutations({ nodes: [], edges: [] }, mutations)`, and the executable plan JSON.
 - `zod@4.3.6` added as a direct dependency.
 
-The ComfyUI-for-DeFi thesis is now functionally proven end-to-end **on the API surface**: chat → tool call → graph mutations → executable plan → E1 runner → mainnet. The remaining wire is the workspace chat panel — applying the mutations to the active `WorkspaceProvider` and offering a "run graph" button that invokes E1 against the executable plan. That's the next milestone.
+The ComfyUI-for-DeFi thesis is now functionally proven end-to-end **on the API surface**: chat → tool call → graph mutations → executable plan → E1 runner → mainnet.
+
+**🎉 WORKSPACE CHAT PANEL WIRED on 2026-04-25.** The thesis demo is now in the actual product surface, not just the smoke page.
+- `ChatPanel` (`src/components/workspace/panels/chat-panel.tsx`) replaces the presentational composer with `useChat` against `/api/chat`. Streams text and `tool-composeStrategy` parts.
+- New `applyGraphMutations(mutations, workspaceId?)` on `WorkspaceProvider` runs the pure `applyMutationsToWorkspace` fold against the active workspace. Returns warnings.
+- `useEffect` over `messages` applies each tool result exactly once, deduping by `toolCallId` via a ref-Set. (Side-effecting in render is wrong; the effect catches every `output-available` transition without re-applying.)
+- New `StrategyComposeMessage` (`src/components/workspace/strategy-compose-message.tsx`) renders the tool result as a chat bubble with summary, warnings, and a **Run graph** button. The button derives `ExecutableNode[]` from `output.executable.nodes` (converting the wire-friendly string `sourceAmount` back to `bigint`), runs `executeGraph` with `useAdapterNodeRunner`, and streams `GraphExecutionEvent`s inline.
+
+End-to-end demo path on `/<workspaceId>`: open chat panel → "swap 0.01 SOL to USDC and lend it on Kamino" → graph nodes appear on the canvas → click Run graph → two transactions execute on mainnet, events stream in the bubble.
 
 **ComfyUI-for-DeFi** remains the foundational design thesis. Agent is a *composer*, not an executor. See `docs/design-thesis.md`.
 
@@ -93,14 +101,28 @@ Still empty: `src/lib/ai/*`, `src/app/api/*`.
 
 ## Next Session Starts Here
 
-### Immediate next work — Wire A2 into the workspace chat panel
+### Immediate next work — mainnet-verify the workspace chat panel wire
 
-A2 proved the wire on the smoke page. The thesis demo needs the same flow inside the actual workspace:
+The wire is built and type-checks; needs hands-on mainnet verification:
+1. Run `bun run dev`, open a workspace, open the Chat panel.
+2. Login with Privy (Solana wallet provisioned).
+3. Send "swap 0.01 SOL to USDC and lend it on Kamino" — confirm:
+   - Two strategy nodes appear on the canvas
+   - The `StrategyComposeMessage` bubble renders with Run-graph button
+4. Click Run graph — confirm two transactions execute on mainnet and signatures stream into the bubble.
 
-1. Replace the existing presentational chat composer in the workspace's chat side panel with a real `useChat` against `/api/chat`.
-2. When a `tool-composeStrategy` part arrives with `state === "output-available"`, call `applyMutationsToWorkspace` against the active workspace via `WorkspaceProvider.updateWorkspaceGraph`.
-3. Add a "Run graph" affordance somewhere visible (canvas toolbar or chat panel) that derives an `ExecutableNode[]` from the active workspace and feeds E1's `executeGraph` with `useAdapterNodeRunner`.
-4. The bridge problem: `WorkspaceGraphNode` doesn't carry `catalogItemId`. Two options — (a) extend `StrategyNodeData` with an optional `catalogItemId` and have the tool stamp it; (b) keep the tool's executable plan around in workspace state and run it directly. Option (a) is cleaner long-term because it lets users hand-build runnable graphs from the picker too.
+If anything misbehaves on the canvas, common gotchas to check first:
+- Node positions overlap with existing graph nodes (the tool uses fixed positions {200,240} / {700,240}; collide-resistant placement is a polish item)
+- React Flow doesn't reflow on programmatic add — may need to nudge the viewport
+- The strategy nodes the tool emits have `data.holdingsLabel`, etc. but no `catalogItemId` on the node itself — the run-graph button works because it uses `output.executable.nodes`, not the canvas state. That split is documented in CLAUDE.md as the bridge problem.
+
+### Bridge problem (active design call)
+
+The compose tool emits `mutations` (for the canvas) and `executable` (for the runner) as parallel shapes because `WorkspaceGraphNode` doesn't carry `catalogItemId`. This works for chat-driven runs but means hand-built canvas graphs can't be run yet. Options:
+- **(a) Stamp `catalogItemId` into `StrategyNodeData`.** Picker + AI both produce runnable nodes uniformly. Small additive type change.
+- **(b) Keep them separate.** Hand-built graphs stay non-runnable until the user goes through chat.
+
+Option (a) wins long-term but needs the picker UX to know which catalog items are runnable (today the visual catalog and the executable adapter list are disjoint).
 
 ### Critical path remaining for thesis demo
 
@@ -112,10 +134,11 @@ A2 proved the wire on the smoke page. The thesis demo needs the same flow inside
 | Kamino USDC (P3) | ✅ Done + mainnet verified |
 | Jupiter swap (P4) | ✅ Done + mainnet verified |
 | E1 Graph execution engine | ✅ Done + mainnet verified |
-| A1 Chat endpoint (AI SDK v6 + Claude) | ✅ Done |
-| A2 composeStrategy tool | ✅ Done (smoke-verified; canvas wire is next) |
-| **Workspace chat panel + run-graph wire** | **Next** |
-| **E2 Widget system** | After workspace chat panel lands |
+| A1 Chat endpoint | ✅ Done |
+| A2 composeStrategy tool | ✅ Done (smoke-verified) |
+| Workspace chat panel + run-graph wire | ✅ Built (mainnet verification pending) |
+| **Bridge: catalogItemId on StrategyNodeData** | **Next** (so hand-built graphs are runnable) |
+| **E2 Widget system** | After bridge |
 
 ### Followup polish that is not on the critical path
 
