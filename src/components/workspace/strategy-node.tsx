@@ -1,8 +1,13 @@
 "use client";
 
 import { memo } from "react";
-import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { Timer } from "@phosphor-icons/react";
+import {
+  Handle,
+  Position,
+  useReactFlow,
+  type NodeProps,
+} from "@xyflow/react";
+import { Timer, X } from "@phosphor-icons/react";
 
 import { Badge } from "@/components/tidal/badge";
 import { CompactSelect } from "@/components/tidal/compact-select";
@@ -26,6 +31,7 @@ export const StrategyNode = memo(
       ? getAdapterCatalogEntry(data.catalogItemId)
       : undefined;
     const widgetValues = data.widgetValues ?? {};
+    const reactFlow = useReactFlow();
 
     return (
       <SurfaceCard className="w-[280px] bg-[#15202E]" padding="none">
@@ -39,7 +45,23 @@ export const StrategyNode = memo(
         <div className="p-4">
           <div className="mb-3 flex items-center justify-between">
             <span className="tidal-text-eyebrow">{data.protocol}</span>
-            <Badge variant="status">{formatWorkspaceNodeStatusLabel(data.status)}</Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="status">{formatWorkspaceNodeStatusLabel(data.status)}</Badge>
+              {isEditable ? (
+                <button
+                  type="button"
+                  aria-label="Remove node"
+                  title="Remove node"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    reactFlow.deleteElements({ nodes: [{ id }] });
+                  }}
+                  className="nodrag flex h-5 w-5 items-center justify-center rounded-md text-tidal-muted transition-colors hover:bg-tidal-sidebar-active hover:text-red-400"
+                >
+                  <X weight="bold" className="h-3 w-3" />
+                </button>
+              ) : null}
+            </div>
           </div>
 
           <div className="mb-3 tidal-text-body">{data.action}</div>
