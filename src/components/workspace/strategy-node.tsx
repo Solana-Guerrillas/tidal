@@ -40,6 +40,21 @@ export const StrategyNode = memo(
         : null;
     const apyDisplay = liveApy ?? data.apy;
     const apyIsLoading = rateState.kind === "loading";
+    // Generic swap-style adapters express their "what does this do" via
+    // input/output asset widgets. When both are picked, render the
+    // dynamic action ("Swap USDC → SOL") in place of the static label.
+    const inputAssetSelected =
+      typeof widgetValues.inputAsset === "string"
+        ? widgetValues.inputAsset
+        : null;
+    const outputAssetSelected =
+      typeof widgetValues.outputAsset === "string"
+        ? widgetValues.outputAsset
+        : null;
+    const dynamicActionLabel =
+      inputAssetSelected && outputAssetSelected
+        ? `${data.action} ${inputAssetSelected} → ${outputAssetSelected}`
+        : data.action;
 
     return (
       <SurfaceCard className="w-[280px] bg-[#15202E]" padding="none">
@@ -72,7 +87,7 @@ export const StrategyNode = memo(
             </div>
           </div>
 
-          <div className="mb-3 tidal-text-body">{data.action}</div>
+          <div className="mb-3 tidal-text-body">{dynamicActionLabel}</div>
 
           <p className="mb-3 tidal-text-caption text-tidal-muted">{data.summary}</p>
 
@@ -296,20 +311,48 @@ StrategyNode.displayName = "StrategyNode";
 type WidgetInputProps = {
   widget: WidgetSchema;
   value: unknown;
-  onChange: (next: number | undefined) => void;
+  onChange: (next: number | string | undefined) => void;
 };
 
 function WidgetInput({ widget, value, onChange }: WidgetInputProps) {
   // The `nodrag` className tells React Flow to ignore pointer events on
   // this element so typing/clicking inside the input doesn't drag the
   // node around the canvas.
-  const stringValue = typeof value === "number" ? String(value) : "";
+  const requiredMarker = widget.required ? (
+    <span className="text-tidal-accent"> *</span>
+  ) : null;
 
+  if (widget.kind === "asset-selector" && widget.options) {
+    const stringValue = typeof value === "string" ? value : "";
+    return (
+      <label className="flex flex-col gap-1 nodrag">
+        <span className="tidal-text-caption text-tidal-muted">
+          {widget.label}
+          {requiredMarker}
+        </span>
+        <select
+          value={stringValue}
+          onChange={(event) => onChange(event.target.value)}
+          className="rounded-md border border-tidal-border bg-tidal-card px-2 py-1 text-sm text-foreground outline-none focus:border-tidal-accent"
+        >
+          {stringValue === "" ? <option value="">Select…</option> : null}
+          {widget.options.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+      </label>
+    );
+  }
+
+  // Default: number input.
+  const stringValue = typeof value === "number" ? String(value) : "";
   return (
     <label className="flex flex-col gap-1 nodrag">
       <span className="tidal-text-caption text-tidal-muted">
         {widget.label}
-        {widget.required ? <span className="text-tidal-accent"> *</span> : null}
+        {requiredMarker}
       </span>
       <input
         type="number"

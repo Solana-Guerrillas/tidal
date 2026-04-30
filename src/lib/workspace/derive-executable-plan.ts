@@ -1,6 +1,7 @@
 import {
   decimalToBaseUnits,
   getAdapterCatalogEntry,
+  getSwapAsset,
 } from "@/lib/solana/adapter-catalog";
 import type {
   ExecutableEdge,
@@ -103,17 +104,48 @@ export function deriveExecutablePlan(workspace: Workspace): ExecutablePlan {
           `${entry.catalogItem.title}: entry node needs a numeric "amount".`,
         );
       } else {
-        const baseUnits = decimalToBaseUnits(
-          amountValue,
-          entry.inputDecimals,
-        );
+        // For swap-style adapters that expose an inputAsset selector,
+        // the input decimals depend on which asset the user picked. For
+        // single-asset adapters (Jito stakes SOL, Kamino supplies USDC)
+        // this falls back to the entry's static inputDecimals.
+        const inputAssetWidget = widgetValues.inputAsset;
+        const swapAsset =
+          typeof inputAssetWidget === "string"
+            ? getSwapAsset(inputAssetWidget)
+            : undefined;
+        const decimals = swapAsset?.decimals ?? entry.inputDecimals;
+        const baseUnits = decimalToBaseUnits(amountValue, decimals);
         if (baseUnits === null || baseUnits <= 0n) {
           errors.push(
             `${entry.catalogItem.title}: amount must be greater than zero.`,
           );
+        } else if (
+          inputAssetWidget !== undefined &&
+          inputAssetWidget !== null &&
+          inputAssetWidget !== "" &&
+          !swapAsset
+        ) {
+          errors.push(
+            `${entry.catalogItem.title}: unsupported input asset "${String(inputAssetWidget)}".`,
+          );
         } else {
           sourceAmount = baseUnits;
         }
+      }
+
+      // Cross-check: if both inputAsset and outputAsset widgets are
+      // present (swap node), they must differ.
+      const inputAssetWidget = widgetValues.inputAsset;
+      const outputAssetWidget = widgetValues.outputAsset;
+      if (
+        typeof inputAssetWidget === "string" &&
+        typeof outputAssetWidget === "string" &&
+        inputAssetWidget === outputAssetWidget &&
+        inputAssetWidget.length > 0
+      ) {
+        errors.push(
+          `${entry.catalogItem.title}: input and output assets must differ (both are ${inputAssetWidget}).`,
+        );
       }
     }
 

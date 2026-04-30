@@ -1,7 +1,6 @@
 import "server-only";
 
-import { getAdapterCatalogEntry } from "./adapter-catalog";
-import { USDC_MINT_ADDRESS } from "./kamino";
+import { getAdapterCatalogEntry, getSwapAsset } from "./adapter-catalog";
 import type {
   APYQuote,
   BuildTransactionParams,
@@ -13,7 +12,6 @@ import type {
   WidgetSchema,
 } from "./types";
 
-const SOL_MINT_ADDRESS = "So11111111111111111111111111111111111111112";
 const JUPITER_ULTRA_ORDER_URL = "https://api.jup.ag/ultra/v1/order";
 
 const ENTRY = getAdapterCatalogEntry("jupiter-swap-sol-usdc")!;
@@ -58,11 +56,39 @@ async function readRate(): Promise<APYQuote | null> {
 async function buildTransaction(
   params: BuildTransactionParams,
 ): Promise<BuildTransactionResult> {
-  const lamports = params.inputAmount;
-  if (lamports <= 0n) {
+  const inputBase = params.inputAmount;
+  if (inputBase <= 0n) {
     throw new Error(
-      `Jupiter swap requires a positive lamport amount (got ${lamports.toString()})`,
+      `Jupiter swap requires a positive input amount (got ${inputBase.toString()})`,
     );
+  }
+
+  const inputSymbolWidget = params.widgets.inputAsset;
+  const outputSymbolWidget = params.widgets.outputAsset;
+  // Default to SOL → USDC if widgets are absent; this preserves the
+  // original adapter behavior for callers (e.g., the AI compose tool)
+  // that don't yet pick a direction.
+  const inputSymbol =
+    typeof inputSymbolWidget === "string" && inputSymbolWidget.length > 0
+      ? inputSymbolWidget
+      : "SOL";
+  const outputSymbol =
+    typeof outputSymbolWidget === "string" && outputSymbolWidget.length > 0
+      ? outputSymbolWidget
+      : "USDC";
+  if (inputSymbol === outputSymbol) {
+    throw new Error(
+      `Jupiter swap input and output assets must differ (got ${inputSymbol}).`,
+    );
+  }
+
+  const inputAsset = getSwapAsset(inputSymbol);
+  const outputAsset = getSwapAsset(outputSymbol);
+  if (!inputAsset) {
+    throw new Error(`Jupiter swap: unsupported input asset "${inputSymbol}".`);
+  }
+  if (!outputAsset) {
+    throw new Error(`Jupiter swap: unsupported output asset "${outputSymbol}".`);
   }
 
   const slippageBpsWidget = params.widgets.slippageBps;
@@ -72,9 +98,9 @@ async function buildTransaction(
       : 50;
 
   const url = new URL(JUPITER_ULTRA_ORDER_URL);
-  url.searchParams.set("inputMint", SOL_MINT_ADDRESS);
-  url.searchParams.set("outputMint", USDC_MINT_ADDRESS);
-  url.searchParams.set("amount", lamports.toString());
+  url.searchParams.set("inputMint", inputAsset.mint);
+  url.searchParams.set("outputMint", outputAsset.mint);
+  url.searchParams.set("amount", inputBase.toString());
   url.searchParams.set("taker", params.walletPublicKey);
   url.searchParams.set("slippageBps", slippageBps.toString());
 

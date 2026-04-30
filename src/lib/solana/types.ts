@@ -50,6 +50,12 @@ export type WidgetSchema = {
   min?: number;
   max?: number;
   required?: boolean;
+  /**
+   * Allowed values for `asset-selector` (and other future enum-like)
+   * widgets. The strategy node renders these as a dropdown. Ignored for
+   * `number` and other free-form kinds.
+   */
+  options?: string[];
 };
 
 export type ReadPositionParams = {

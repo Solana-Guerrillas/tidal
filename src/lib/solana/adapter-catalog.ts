@@ -7,6 +7,52 @@
 import type { NodeCatalogItem } from "@/mock-data/workspace/types";
 import type { WidgetSchema } from "./types";
 
+/**
+ * Registry of swap-eligible assets. Used by the Jupiter Ultra adapter to
+ * look up mint addresses + decimals from a user-selected asset symbol.
+ * Adding a new asset here makes it available for both directions of the
+ * swap node automatically — no code changes elsewhere.
+ */
+export type SwapAsset = {
+  symbol: string;
+  mint: string;
+  decimals: number;
+};
+
+export const SWAP_ASSETS: SwapAsset[] = [
+  {
+    symbol: "SOL",
+    mint: "So11111111111111111111111111111111111111112",
+    decimals: 9,
+  },
+  {
+    symbol: "USDC",
+    mint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+    decimals: 6,
+  },
+  {
+    symbol: "USDT",
+    mint: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
+    decimals: 6,
+  },
+  {
+    symbol: "JitoSOL",
+    mint: "J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn",
+    decimals: 9,
+  },
+  {
+    symbol: "mSOL",
+    mint: "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So",
+    decimals: 9,
+  },
+];
+
+export const SWAP_ASSET_SYMBOLS: string[] = SWAP_ASSETS.map((a) => a.symbol);
+
+export function getSwapAsset(symbol: string): SwapAsset | undefined {
+  return SWAP_ASSETS.find((a) => a.symbol === symbol);
+}
+
 export type AdapterCatalogEntry = {
   catalogItem: NodeCatalogItem;
   // Display hints used when synthesizing a strategy node from this entry.
@@ -94,28 +140,48 @@ const KAMINO_ENTRY: AdapterCatalogEntry = {
 
 const JUPITER_SWAP_ENTRY: AdapterCatalogEntry = {
   catalogItem: {
+    // Id kept as "jupiter-swap-sol-usdc" for backwards compat with the
+    // registry and the AI compose-strategy tool. The node now supports
+    // any direction across the swap-asset registry; the id is just an
+    // opaque key.
     id: "jupiter-swap-sol-usdc",
-    title: "Swap SOL → USDC (Jupiter)",
+    title: "Swap (Jupiter)",
     description:
-      "Swap SOL for USDC via Jupiter Ultra. Returns best-of-route price with MEV protection.",
+      "Swap any supported token pair via Jupiter Ultra. Best-of-route pricing with MEV protection.",
     group: "route_math",
     nodeKind: "strategy",
-    supportedInputAssets: ["SOL"],
-    primaryOutputAsset: "USDC",
+    supportedInputAssets: SWAP_ASSET_SYMBOLS,
+    primaryOutputAsset: "selected output",
     protocolLabel: "Jupiter",
     keywords: ["swap", "jupiter", "ultra", "exchange", "convert"],
   },
-  actionLabel: "Swap SOL → USDC",
+  actionLabel: "Swap",
   apyDisplay: "n/a",
   apyType: "earn",
-  outputAsset: "USDC",
+  outputAsset: "selected",
   primaryHandleId: "next",
-  primaryHandleLabel: "Swapped USDC",
+  primaryHandleLabel: "Swapped output",
   widgets: [
+    {
+      key: "inputAsset",
+      kind: "asset-selector",
+      label: "From",
+      options: SWAP_ASSET_SYMBOLS,
+      default: "SOL",
+      required: true,
+    },
+    {
+      key: "outputAsset",
+      kind: "asset-selector",
+      label: "To",
+      options: SWAP_ASSET_SYMBOLS,
+      default: "USDC",
+      required: true,
+    },
     {
       key: "amount",
       kind: "number",
-      label: "Amount to swap (SOL)",
+      label: "Amount",
       min: 0,
       default: 0.01,
       required: true,
@@ -130,6 +196,11 @@ const JUPITER_SWAP_ENTRY: AdapterCatalogEntry = {
       required: false,
     },
   ],
+  // For bidirectional swaps, inputDecimals is dynamic — derived from the
+  // selected `inputAsset` widget at execution time. We keep the field
+  // here pointing at SOL as a sane fallback, but `derive-executable-plan`
+  // overrides it for adapter entries whose widgets include an asset-
+  // selector keyed `inputAsset`.
   inputDecimals: 9,
 };
 
