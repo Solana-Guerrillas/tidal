@@ -1,9 +1,9 @@
 # Checkpoint
 
-**Last updated:** 2026-04-27
+**Last updated:** 2026-04-29
 **Branch:** main (clean, pushed to origin)
-**Latest commit:** `6164bad` — fix(workspace): sync AI-composed nodes onto the canvas
-**Hackathon meeting:** Thursday 2026-04-30 — present MVP demo
+**Latest commit:** `a837987` — feat(workspace): bidirectional Jupiter swap across any supported pair
+**Hackathon meeting:** Thursday 2026-04-30 — present MVP demo (informal progress check)
 
 ---
 
@@ -130,45 +130,78 @@ Unchanged from last checkpoint. Tree is: `TooltipProvider` (now nested under `Pr
 
 Still empty: `src/lib/ai/*`, `src/app/api/*`.
 
-## Next Session Starts Here — Tuesday 2026-04-28 (heavy coding day before Thursday meeting)
+## Session 2026-04-29 — heavy coding day, six features shipped
 
-### Demo readiness checklist — what we have
+**Two hands-on test passes worth of mainnet runs.** Counted 7+ real Solana transactions across the day's commits.
 
-The MVP works end-to-end on mainnet. Thursday's demo can confidently show:
+### Shipped (in commit order)
 
-1. Open `/workspace-new-strategy` (or any builder workspace URL) in **incognito** to dodge form-filler hydration noise.
-2. Login with Privy (embedded wallet auto-provisions).
-3. In chat: `stake 0.01 SOL with Jito` (single-node, ~$2 cost) **OR** `swap 0.01 SOL to USDC and lend it on Kamino` (two-node, dramatic — but ~$2 cost).
-4. Watch the strategy nodes appear on the canvas in real time.
-5. Click Run graph in the bubble. Two mainnet txs settle in ~30s. The user controls signing — agent is composer, not executor.
+1. `e1b4ddd` — **AI node positioning relative to existing graph**. New pure helper `placeMutationsRelativeTo(existing, mutations, options?)` in `mutations.ts`. Translates `add-node` positions so the leftmost new node lands `gap` (default 350) pixels right of the rightmost existing node, preserving the AI's relative x-spacing. ChatPanel uses a latest-ref pattern to read the freshest workspace.nodes inside the apply effect without re-running on every drag/edit.
 
-### Highest-leverage Tuesday work (in priority order)
+2. `ff24bc5` — **E2 widgets + run-from-canvas-state.** The big one. The canvas is now a real composition surface.
+   - `AdapterCatalogEntry` gained `widgets: WidgetSchema[]` and `inputDecimals`.
+   - Adapter modules (jito/kamino/jupiter-swap) pull their WIDGETS from the shared catalog (single source of truth).
+   - `decimalToBaseUnits(decimal, decimals)` helper converts user-entered amounts (0.01 SOL) to base-unit BigInts (10_000_000n lamports).
+   - `StrategyNodeData.widgetValues?: Record<string, unknown>` stores user inputs.
+   - `node-factories.ts` seeds widget defaults so picker-dropped nodes are immediately runnable.
+   - `strategy-node.tsx` renders number inputs per widget when `isEditable`. `nodrag` className prevents React Flow from dragging while the user types.
+   - New pure `deriveExecutablePlan(workspace) → { nodes, edges, errors }` walks canvas state, validates required widgets, derives entry-node sourceAmount via `decimalToBaseUnits`, drops edges through visual-only nodes.
+   - New `CanvasRunPanel` floating top-right of the canvas. Click → derive plan → if errors show in amber, else `executeGraph` with `useAdapterNodeRunner`. Streams events into a floating panel below the button.
+   - **Verified mainnet:** dropped Jito from picker, hit Run, single-tx mainnet stake settled (`2AMAniAK…qqDjcS`). Then a hand-built two-hop graph (Jupiter swap → Kamino supply, wired by hand) settled (`2TUdy6bV…EqoJYA` + `H9CGywsN…V76mAc`).
 
-1. **Verify the streaming events display in `StrategyComposeMessage` actually shows event lines during a Run.** The events stream into local `runState`, but I never confirmed they render visibly during the test pass — the user reported "nothing really changed on the screen" for one run, even though logs show submit-transaction returned 200. Could be a re-render timing thing, could be local state being reset when the parent re-renders. 30 min to verify and fix if broken. Demo loses dramatic punch without the event ticker.
+3. `c122b10` — **Explicit delete button on adapter-backed strategy nodes**. React Flow's default Backspace shortcut gets eaten by widget-input focus state. Added a small × button on the node header (top-right, next to status badge) when `isEditable`. Uses `useReactFlow().deleteElements({ nodes: [{ id }] })` so it goes through the existing onNodesChange pipeline and connected edges clean up automatically.
 
-2. **AI node positioning.** Hardcoded `(320, 240)` / `(700, 240)` collides with existing nodes on workspaces that aren't pristine. Make the tool place new nodes relative to the rightmost existing node (or below it) so composing onto a partially-built graph doesn't pile on top. Also consider an auto-fitView nudge after applying mutations so the user doesn't miss the new content. ~30-45 min.
+4. `9241784` — **Real on-chain SOL/USDC balances on the wallet node**. New `useWalletBalances` hook calls `getBalance` + `getTokenAccountsByOwner` through the existing `/api/solana/rpc` Helius proxy. Discriminated state (no-wallet / loading / ready / error). Wallet node shows mocked balances when no wallet connected (preserves seeded look), real balances when ready, status feedback for loading/error. New refresh icon (top-right of node) animates while a fetch is in flight. USD value slot becomes the truncated wallet address (more honest than a stale dollar figure with no price feed wired).
 
-3. **Run-graph from canvas state (so hand-built graphs are runnable).** Currently the Run button uses `output.executable.nodes` from the tool's plan, which is fine for AI-composed graphs. To run a graph the user built from the picker, we need to derive `ExecutableNode[]` by walking workspace nodes/edges and pulling `node.data.catalogItemId` (already stamped) + a `sourceAmount`. That last piece is the blocker — needs E2 widgets. **Skip this for the meeting MVP**; AI-composed runs are the demo.
+5. `e3e1242` — **Live APY readouts on adapter-backed strategy nodes.** New `GET /api/solana/rates?catalogItemId=<id>` route → `adapter.readRate()`. New `useAdapterRate(catalogItemId)` hook with module-level memo cache (60s TTL) so multiple Kamino nodes share a single fetch per minute. Strategy node shows static catalog fallback (`~5.9%`, `variable`, `n/a`) first, then swaps to live percentage with a small `· live` accent label once the round-trip resolves. Jupiter swap returns null (no APY semantics) so its node stays on `n/a` without a `· live` label.
 
-4. **E2: minimal source-amount widget on adapter strategy nodes.** Single number input that writes back to node data. Needed for hand-built graphs to run. Probably 1-2 hours including respecting `WidgetSchema` from each adapter (jito + kamino + jupiter all expose it). Worth doing if the meeting's response is "now let me try building one myself."
+6. `a837987` — **Bidirectional Jupiter swap across any supported pair.** Generalized the SOL→USDC-only swap into a configurable any-pair node.
+   - New `SwapAsset` type + `SWAP_ASSETS` registry in adapter-catalog.ts (SOL, USDC, USDT, JitoSOL, mSOL with mint addresses + decimals). Adding a new pair is one entry.
+   - `WidgetSchema` gained an optional `options: string[]` field for select/asset-selector kinds.
+   - Jupiter catalog entry renamed to "Swap (Jupiter)", widgets become inputAsset (default SOL) + outputAsset (default USDC) + amount + slippageBps. Catalog id kept as `jupiter-swap-sol-usdc` for backwards compat with the AI compose tool.
+   - `jupiter-swap.ts` `buildTransaction` reads inputAsset/outputAsset widgets, looks up mints via `getSwapAsset`, validates input ≠ output. Defaults preserved for when widgets are absent.
+   - Strategy node: new `<select>` rendering for asset-selector kind, dynamic action label `"Swap USDC → SOL"` when both asset widgets are set.
+   - `derive-executable-plan` now uses the swap asset's decimals (looked up via getSwapAsset) when an inputAsset widget is set; falls back to entry's static inputDecimals for single-asset adapters. Validates input/output assets differ.
+   - **Verified mainnet:** hand-built reverse swap settled (`7dbndrJ6…XLMT95`) — first time the wallet swapped in a non-SOL→USDC direction.
 
-5. **Wallet node showing real Privy balance.** Currently mocked (126.40 SOL, 42,000 USDC). For Thursday it's fine to keep mocked; but reading the actual balance via `getSolanaRpc().getBalance(walletAddress)` would make the demo feel more honest. ~20 min.
+### Demo readiness for tomorrow's informal progress check
 
-### Demo polish (lower priority but cheap)
+The MVP is dramatically more functional than yesterday. Confidently demonstrable:
 
-- Auto-fitView (or pan-to) on AI-composed nodes after they land
-- Clean console — already cleaned diagnostic logs out, but watch for new ones during testing
-- Subtle "AI composed this" indicator on AI-added strategy nodes (the `draftState.changedFields: ["composed-by-ai"]` is already set; just expose it visually)
-- Demo script in `docs/demo-script.md` — three prompts, expected outputs, recovery if a prompt misbehaves
+- Build a strategy graph by hand from the picker (Jito stake, Kamino USDC supply, bidirectional Jupiter swap)
+- Edit per-node inputs (amount, slippage, swap direction)
+- Hit Run → real mainnet transactions stream events into the floating panel
+- OR: ask the AI in chat → strategy graph appears on canvas → same Run flow
+- Wallet shows real on-chain balances; nodes show real APYs
+- Delete + refresh + drag + connect — all the real composition affordances are there
 
-### Don't pull on these threads before Thursday
+### What did NOT ship today
 
-- Adding more adapter integrations (Drift, Sanctum, etc.)
-- Real `readRate` for Jito (5.9% stub is fine)
-- Real `readPosition` for Kamino obligations
-- Position fetching for `/api/solana/positions`
-- Bidirectional Jupiter swap
-- Any frontend refactor of 0xJulo's existing components
+- `#4 Another adapter` (Sanctum / Jupiter Lend / Drift / Kamino Earn Vaults). Recommendation in CHECKPOINT.md prioritized Sanctum (smallest, biggest demo unlock — LST routing).
+
+## Next Session Starts Here
+
+### Wednesday/Thursday plan — demo prep + optional adapter
+
+Today's wishlist for the active polish list is essentially exhausted. The remaining moves are:
+
+**Optional before the meeting:**
+1. **Demo dry-run** (~30 min). Pick three prompts, time the runs, write `docs/demo-script.md` with prompts + expected outputs + recovery paths. Practice once with a fresh wallet on incognito.
+2. **Auto fit-view on AI-composed nodes** (~15 min). After applying mutations, call `useReactFlow().fitBounds()` on the new node bbox so the user always sees them.
+3. **Subtle "AI composed this" badge** (~15 min). The `draftState.changedFields: ["composed-by-ai"]` is already set; just expose it visually on the node header.
+
+**Bigger features still on the roadmap (post-meeting):**
+- `#4 Another adapter` — Sanctum INF (LST router, agent picks between LSTs based on rates), Jupiter Lend (rate-shop vs Kamino), Drift lending (Mid-Depth tier), or Kamino Curated Earn Vaults
+- Inverse paths: Jito unstake, Kamino withdraw
+- E4 type-colored edges (asset palette, partner waiting-on-color decision)
+- Templates gallery
+- Cross-adapter rate comparison surfaced in chat
+- Position dashboard across all adapters
+
+**Don't pull on these threads:**
+- Cross-chain (parked from v1)
+- Frontend refactor of 0xJulo's existing components
+- Anything that introduces new abstractions for hypothetical future adapters before they exist
 
 ### Critical path remaining for thesis demo
 
@@ -186,11 +219,15 @@ The MVP works end-to-end on mainnet. Thursday's demo can confidently show:
 | Bridge: catalogItemId on StrategyNodeData + adapters in picker | ✅ Done |
 | Canvas sync: external mutations reach React Flow | ✅ Done + verified |
 | Login surface in workspace UI | ✅ Done |
-| Streaming events ticker on Run graph | 🟡 Wire is there; visual confirmation pending |
-| AI node positioning relative to existing graph | Tuesday |
-| Demo script + dry-run | Tuesday/Wednesday |
-| **E2 Widget system + run-from-canvas-state** | **Core Phase 1 deliverable** — turns the canvas into a real composition surface (hand-built graphs run on mainnet, just like AI-composed ones). Realistic Tuesday or Wednesday scope (~3-4 hrs). Includes: render widget inputs on adapter-backed strategy nodes, persist `widgetValues` to `node.data`, canvas-toolbar Run button that derives `ExecutableNode[]` from `workspace.nodes`/`edges` + widget values, reuses `useAdapterNodeRunner` + `executeGraph`. Adapters already expose `WidgetSchema`; runner already accepts widget values. |
-| Real wallet balance on the wallet node | Optional polish |
+| Streaming events ticker on Run graph | ✅ Done + verified |
+| AI node positioning relative to existing graph | ✅ Done |
+| **E2 widgets + run-from-canvas-state** | ✅ Done + mainnet verified |
+| Delete button on strategy nodes | ✅ Done |
+| Real wallet balance on the wallet node | ✅ Done |
+| Live APY readouts on strategy nodes | ✅ Done |
+| Bidirectional Jupiter swap | ✅ Done + mainnet verified |
+| Demo script + dry-run | Wed/Thu |
+| Adapter #4 (Sanctum / Jupiter Lend / Drift / Kamino Earn) | Post-meeting |
 
 ### Followup polish that is not on the critical path
 
