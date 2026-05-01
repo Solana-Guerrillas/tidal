@@ -154,8 +154,40 @@ export const StrategyNode = memo(
                       if (currentData.nodeKind !== "strategy") {
                         return currentData;
                       }
+                      // For swap-style asset selectors, the widget value
+                      // also drives typed metadata that React Flow uses
+                      // for edge-compatibility checks. Mirror inputAsset
+                      // -> data.inputAsset/acceptedAssets and outputAsset
+                      // -> data.outputs[0].asset so dragging an edge from
+                      // a swap node into a downstream node respects the
+                      // new direction.
+                      let nextInputAsset = currentData.inputAsset;
+                      let nextAcceptedAssets = currentData.acceptedAssets;
+                      let nextOutputs = currentData.outputs;
+                      if (
+                        widget.key === "inputAsset" &&
+                        typeof nextValue === "string" &&
+                        nextValue.length > 0
+                      ) {
+                        nextInputAsset = nextValue;
+                        nextAcceptedAssets = [nextValue];
+                      }
+                      if (
+                        widget.key === "outputAsset" &&
+                        typeof nextValue === "string" &&
+                        nextValue.length > 0
+                      ) {
+                        nextOutputs = currentData.outputs.map((output) =>
+                          output.kind === "primary"
+                            ? { ...output, asset: nextValue }
+                            : output,
+                        );
+                      }
                       return {
                         ...currentData,
+                        inputAsset: nextInputAsset,
+                        acceptedAssets: nextAcceptedAssets,
+                        outputs: nextOutputs,
                         widgetValues: {
                           ...(currentData.widgetValues ?? {}),
                           [widget.key]: nextValue,

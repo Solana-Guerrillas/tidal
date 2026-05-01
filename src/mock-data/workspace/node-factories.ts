@@ -531,7 +531,6 @@ function buildAdapterStrategyNode(
   position: { x: number; y: number },
 ): StrategyNodeType {
   const item = entry.catalogItem;
-  const inputAsset = item.supportedInputAssets[0];
 
   // Seed widget defaults so a freshly-dropped node is runnable without the
   // user having to fill in every input. Required widgets without a default
@@ -543,6 +542,25 @@ function buildAdapterStrategyNode(
     }
   }
 
+  // For swap-style adapters (Jupiter today; future LST routers tomorrow)
+  // the input and output assets are user-selected via widgets. Promote
+  // those widget defaults onto the node's typed handle/asset metadata so
+  // edge-compatibility checks against acceptedAssets / output.asset work
+  // out of the box. Single-asset adapters (Jito stakes SOL, Kamino takes
+  // USDC) fall back to the catalog's static fields.
+  const seededInputAsset =
+    typeof widgetValues.inputAsset === "string"
+      ? widgetValues.inputAsset
+      : item.supportedInputAssets[0];
+  const seededOutputAsset =
+    typeof widgetValues.outputAsset === "string"
+      ? widgetValues.outputAsset
+      : entry.outputAsset;
+  const seededAcceptedAssets =
+    typeof widgetValues.inputAsset === "string"
+      ? [widgetValues.inputAsset]
+      : [...item.supportedInputAssets];
+
   return {
     id: createNodeId("strategy"),
     type: "strategy",
@@ -553,19 +571,19 @@ function buildAdapterStrategyNode(
       summary: item.description,
       protocol: item.protocolLabel ?? "",
       action: entry.actionLabel,
-      inputAsset,
-      acceptedAssets: [...item.supportedInputAssets],
+      inputAsset: seededInputAsset,
+      acceptedAssets: seededAcceptedAssets,
       outputs: [
         {
           id: entry.primaryHandleId,
           label: entry.primaryHandleLabel,
-          asset: entry.outputAsset,
+          asset: seededOutputAsset,
           kind: "primary",
           compatibleNodeTypes: ["amount", "strategy", "split", "destination"],
         },
       ],
       status: "draft",
-      holdingsLabel: `Awaiting ${inputAsset} input`,
+      holdingsLabel: `Awaiting ${seededInputAsset} input`,
       draftState: { hasChanges: true, changedFields: ["from-picker"] },
       apy: entry.apyDisplay,
       apyType: entry.apyType,
