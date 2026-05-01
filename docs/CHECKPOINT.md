@@ -1,9 +1,9 @@
 # Checkpoint
 
-**Last updated:** 2026-04-29
+**Last updated:** 2026-04-30
 **Branch:** main (clean, pushed to origin)
-**Latest commit:** `a837987` — feat(workspace): bidirectional Jupiter swap across any supported pair
-**Hackathon meeting:** Thursday 2026-04-30 — present MVP demo (informal progress check)
+**Latest commit:** `38f7502` — fix(workspace): swap node's typed output asset reflects widget selection
+**Hackathon submission:** ~2026-05-10 (10 days out, comfortable runway)
 
 ---
 
@@ -179,29 +179,60 @@ The MVP is dramatically more functional than yesterday. Confidently demonstrable
 
 - `#4 Another adapter` (Sanctum / Jupiter Lend / Drift / Kamino Earn Vaults). Recommendation in CHECKPOINT.md prioritized Sanctum (smallest, biggest demo unlock — LST routing).
 
-## Next Session Starts Here
+## Session 2026-04-30 — meeting with 0xJulo + scope shift
 
-### Wednesday/Thursday plan — demo prep + optional adapter
+Met with 0xJulo. Feedback was "on the right track" with significant scope expansion: lending is the priority, investment tracker is bread-and-butter, yield compounding is a huge selling point. The pre-meeting active list (one more adapter) is replaced by the post-meeting Tier 1 below.
 
-Today's wishlist for the active polish list is essentially exhausted. The remaining moves are:
+**Adapter scope locked:** Jito + Jupiter + Kamino are the core three. Sanctum / Jupiter Lend / Kamino Earn Vaults are parked optional. **Drift is off** the v1 roadmap (recent hack); Jupiter Perps takes that slot if perps becomes a priority. See `_archive/` and CLAUDE.md "Parked Features" once those land.
 
-**Optional before the meeting:**
-1. **Demo dry-run** (~30 min). Pick three prompts, time the runs, write `docs/demo-script.md` with prompts + expected outputs + recovery paths. Practice once with a fresh wallet on incognito.
-2. **Auto fit-view on AI-composed nodes** (~15 min). After applying mutations, call `useReactFlow().fitBounds()` on the new node bbox so the user always sees them.
-3. **Subtle "AI composed this" badge** (~15 min). The `draftState.changedFields: ["composed-by-ai"]` is already set; just expose it visually on the node header.
+Verified `38f7502` in browser: regression where bidirectional swap broke edge connectivity (Jupiter output advertised "selected" placeholder asset, didn't match Kamino's `acceptedAssets: ["USDC"]`). Fixed by promoting widget defaults onto typed metadata at node creation + mirroring widget changes back into typed handles.
 
-**Bigger features still on the roadmap (post-meeting):**
-- `#4 Another adapter` — Sanctum INF (LST router, agent picks between LSTs based on rates), Jupiter Lend (rate-shop vs Kamino), Drift lending (Mid-Depth tier), or Kamino Curated Earn Vaults
-- Inverse paths: Jito unstake, Kamino withdraw
-- E4 type-colored edges (asset palette, partner waiting-on-color decision)
-- Templates gallery
-- Cross-adapter rate comparison surfaced in chat
-- Position dashboard across all adapters
+## Next Session Starts Here — Tier 1 (~10-11 hours, 10-day runway)
 
-**Don't pull on these threads:**
+Submission target ~2026-05-10. Tier 1 is comfortably absorbable across 2-3 focused sessions.
+
+### Tier 1 — must ship
+
+| # | Item | Effort | Notes |
+|---|---|---|---|
+| 1 | **Remove Discover panel** | ~25 min | Clear cleanup. Move panel + mock data to `_archive/` (don't fully delete). Add a "Parked Features" section to CLAUDE.md populated with all parked items (Discover, Drift, Sanctum, Jupiter Lend, Kamino Earn, scheduler, cycle-on-canvas, NFT, gamification) using the what/why/when-to-revisit format. |
+| 2 | **Kamino borrow adapter** | ~3-4 hrs | The "lending is key" answer. Supply collateral → mint borrow position. Foundation for #3. |
+| 3 | **Leverage loop composite node** | ~2-3 hrs | Composite "Leverage Loop on Kamino" node with widgets `collateralAsset`, `loopCount`, `targetLTV`. Internally expands to N rounds of supply→borrow→swap→supply via existing `executeGraph`. Demos yield compounding directly. |
+| 4 | **Investment tracker + Kamino position reads** | ~3-3.5 hrs | Wire `/api/solana/positions` into the panel. Implement Kamino obligation reads (currently stubbed null). Auto-refresh after a successful Run. Display: position amount, live APY, projected annual yield, risk tier. |
+| 5 | **Active position locking** | ~45 min | Pairs with #4. Gate the × button on adapter strategy nodes when an active on-chain position exists. Visual indicator (lock icon, color-coded border, or status badge swap). |
+
+### Tier 1 optional (cut if pressure hits)
+
+| # | Item | Effort | Notes |
+|---|---|---|---|
+| O1 | **3 templates** | ~1.5 hrs | 0xJulo specifically asked for ≥3, but explicitly cuttable. Best candidates: Leverage Loop on Kamino, Stake-and-Hold (Jito), Stablecoin Lending (Kamino USDC supply). One template should showcase the leverage loop. |
+
+### Tier 2 — high-value polish, do after Tier 1 if time permits
+
+| # | Item | Effort | Why |
+|---|---|---|---|
+| P1 | Markdown rendering in chat | ~30 min | Currently raw text; agent's lists/bold lose punch. `react-markdown`. |
+| P2 | Agent reads wallet balances in chat | ~30 min | New AI tool `readWalletBalances`. Lets the agent answer "how much SOL do I have?" or use balances when composing. |
+| P3 | Compounding APY display | ~30 min | Show "≈12% effective when looped 5x" alongside the base APY on adapter strategy nodes. Pairs with #3. |
+| P4 | Visual feedback for rejected edges | ~30 min | Toast or red flash when React Flow rejects an incompatible drop. |
+| P5 | × button on visual-only nodes (amount/split/destination/reward + legacy strategy nodes) | ~20 min | We have it on adapter-backed strategy nodes only today. |
+| P6 | Auto fit-view on AI-composed nodes | ~15 min | `useReactFlow().fitBounds()` on the new node bbox after applying mutations. |
+| P7 | "AI composed this" badge on AI-added nodes | ~15 min | `draftState.changedFields: ["composed-by-ai"]` already set; just expose visually. |
+
+### Stretch goals — only if everything else is done
+
+- **Unroll everything** (~1 hr) — one-click liquidate all active positions
+- **Cycle-on-canvas leverage loops** (flavor B) — runner detects user-drawn cycles and asks for iteration count. Higher demo wow factor than the composite node, but harder.
+- **E4 type-colored edges** — partner needs to pick palette; pure visual.
+- **Adapter expansion** — Sanctum INF (LST routing, "AI rate-shops between LSTs") if Tier 1 + 2 ships with time to spare. Otherwise parked.
+
+### Don't pull on these threads
+
 - Cross-chain (parked from v1)
 - Frontend refactor of 0xJulo's existing components
-- Anything that introduces new abstractions for hypothetical future adapters before they exist
+- Auto-compounding scheduler (flavor C of looping) — needs off-chain keeper infra, days of work
+- New abstractions for hypothetical future adapters before they exist
+- Drift adapters (off due to recent hack — see CLAUDE.md / parked-features memory)
 
 ### Critical path remaining for thesis demo
 
