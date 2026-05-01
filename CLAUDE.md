@@ -228,22 +228,46 @@ Keep route handlers thin. Business logic belongs in `src/lib/*`, not in `app/api
 - **Wallet/Auth:** Privy with `walletChainType: 'ethereum-and-solana'` (Phantom/Backpack external + embedded wallets)
 - **AI:** Vercel AI SDK v6 + Claude (model IDs per root instructions — default to latest Claude 4.x)
 - **Swaps:** Jupiter Ultra API direct (2-endpoint `/order` → `/execute`, Beam relayer, no RPC needed)
-- **Lending:** `@kamino-finance/klend-sdk`, Jupiter Lend API
-- **Staking:** Jito stake pool (`@jito-foundation/jito-ts-sdk` or direct IX), Sanctum router
-- **Perps/Lending (Phase 2):** `@drift-labs/sdk`
+- **Lending:** `@kamino-finance/klend-sdk`, Jupiter Lend API (Jupiter Lend parked — see Parked Features)
+- **Staking:** Jito stake pool (`@jito-foundation/jito-ts-sdk` or direct IX); Sanctum router parked
+- **Perps:** Jupiter Perps if/when perps become a priority. Drift is **off the v1 roadmap** due to a recent hack — see Parked Features.
 - **Yield Data:** DeFi Llama Yields API (filter `chain === "Solana"`)
 
 Confirm exact package names against PRD before installing. Do not substitute deprecated alternatives.
 
-### Out Of Scope (Parked From v1)
+### Parked Features
 
-Do not re-introduce without explicit approval:
+When a feature is removed or deferred, capture three things at the moment of decision: **what** was touched, **why** it was paused, **when** to bring it back. `docs/CHECKPOINT.md` is for active work; this section is the long-term graveyard with off-ramps.
 
-- EVM chain configs (Base, Arbitrum, Optimism)
-- Li.Fi SDK (parked for future cross-chain phase)
-- AAVE V3 adapters
-- ERC-4626 vault adapter
-- wagmi hooks (replaced by Solana wallet adapter / Privy Solana hooks)
+Do not re-introduce anything below without explicit approval.
+
+#### EVM and cross-chain (parked from v1)
+
+- **EVM chain configs** (Base, Arbitrum, Optimism). **Reintroduce when:** the Solana surface is mature and there's a clear cross-chain story.
+- **Li.Fi SDK** — cross-chain bridging.
+- **AAVE V3 adapters** — EVM lending.
+- **ERC-4626 vault adapter** — EVM yield-bearing tokens.
+- **wagmi hooks** — replaced by Solana wallet adapter / Privy Solana hooks. Stays parked permanently for v1.
+
+#### Solana protocol adapters (parked, not blocking)
+
+The core adapter set is locked to **Jito + Jupiter + Kamino** for v1. The four entries below are optional vocabulary expansion, not v1 blockers.
+
+- **Sanctum INF staking** — LST router, would let the agent route between liquid staking tokens (JitoSOL ↔ INF ↔ mSOL). **Reintroduce when:** Tier 1 ships and we want to pitch "AI rate-shops between LSTs."
+- **Jupiter Lend USDC** — second stablecoin lender; same adapter shape as Kamino. **Reintroduce when:** "agent rate-shops between lenders" becomes a pitch beat.
+- **Kamino Curated Earn Vaults** — Mid-Depth tier (8-15% APY). **Reintroduce when:** expanding strategy vocabulary into Mid-Depth.
+- **Drift adapters** — **off the v1 roadmap due to a recent hack.** Trust/safety: shipping a Drift integration in the wake of an exploit signals weak diligence to a DeFi-curious user base. **Replacement:** Jupiter Perps takes Drift's perps slot if/when perps become a priority. **Reintroduce when:** Drift's safety profile is comprehensively cleaned up and audit posture re-established.
+
+#### Workspace UI features parked
+
+- **Discover panel** — removed in this commit. Sources moved to `_archive/discover/` (mock data + panel + discovery / recommendation cards) so resurrection is cheap. The panel was a mocked recommendations / discovery view. **Reintroduce when:** social features become a priority — sharing strategies, follower feeds, leaderboards, "what other Tidal users are running."
+- **Gamification** (GitHub stars, public/private workspaces, achievement badges) — clusters with Discover; same social-features trigger.
+- **NFT position representation** — wrap on-chain positions as NFTs for visibility / transferability. **Reintroduce when:** position lifecycle is mature enough that wrapping adds value (long-term lending locks, Tidal achievements, etc.).
+
+#### Infrastructure parked
+
+- **Auto-compounding scheduler** (flavor C of yield looping) — automated rebalancing / harvest-and-reinvest on a schedule. **Reintroduce when:** Tidal has off-chain backend infrastructure (cron / keeper bot / persistent storage) and the demand for unattended automation justifies the operational complexity.
+- **Cycle-on-canvas leverage loops** (flavor B) — runner detects user-drawn cycles and asks for iteration count. Higher demo wow factor than the composite "Leverage Loop" node (flavor A), but harder. **Reintroduce when:** flavor A ships and demand for visual cycle authoring becomes apparent.
 
 ### Testing Notes
 

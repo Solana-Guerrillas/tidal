@@ -3,7 +3,6 @@
 import type { ComponentType } from "react";
 import {
   ChatCircle,
-  Compass,
   Coins,
   SquaresFour,
   TreeStructure,
@@ -26,7 +25,6 @@ const railItems: RailItem[] = [
   { id: "nodes", label: "Nodes", icon: TreeStructure },
   { id: "chat", label: "Chat", icon: ChatCircle },
   { id: "investments", label: "Investments", icon: Coins },
-  { id: "discover", label: "Discover", icon: Compass },
   { id: "templates", label: "Templates", icon: SquaresFour },
 ];
 

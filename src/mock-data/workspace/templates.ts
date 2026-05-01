@@ -54,7 +54,7 @@ export const workspaceTemplates: WorkspaceTemplate[] = [
     id: "drift-insurance-explorer",
     title: "Drift insurance explorer",
     subtitle:
-      "Prototype the Drift insurance vault as a discovery node and model its effect on overall workspace risk.",
+      "Prototype the Drift insurance vault as a research node and model its effect on overall workspace risk.",
     category: "Use cases",
     tags: ["Drift", "Insurance", "Research"],
     accent: "linear-gradient(135deg, #3A2033 0%, #1A0B17 100%)",

@@ -12,7 +12,6 @@ import {
 export const sidePanelIds = [
   "nodes",
   "investments",
-  "discover",
   "chat",
   "templates",
 ] as const;

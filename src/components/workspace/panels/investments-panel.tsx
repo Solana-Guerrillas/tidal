@@ -27,8 +27,8 @@ export function InvestmentsPanel({ workspaceId, onClose }: InvestmentsPanelProps
         {investments.positions.length === 0 ? (
           <SurfaceCard tone="muted">
             <p className="tidal-text-message">
-              No active positions yet. Build a strategy on the canvas or accept a
-              recommendation from Discover to see it listed here.
+              No active positions yet. Build a strategy on the canvas or ask
+              the AI to compose one in chat to see it listed here.
             </p>
           </SurfaceCard>
         ) : (

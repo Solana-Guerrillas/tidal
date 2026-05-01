@@ -24,7 +24,6 @@ import { WorkspaceBuilderContextProvider } from "@/components/workspace/workspac
 import { ChatPanel } from "@/components/workspace/panels/chat-panel";
 import { NodesPanel } from "@/components/workspace/panels/nodes-panel";
 import { InvestmentsPanel } from "@/components/workspace/panels/investments-panel";
-import { DiscoverPanel } from "@/components/workspace/panels/discover-panel";
 import { TemplatesPanel } from "@/components/workspace/panels/templates-panel";
 import {
   NodePicker,
@@ -419,10 +418,6 @@ function WorkspaceCanvasHost({
       case "investments":
         return (
           <InvestmentsPanel workspaceId={workspace.id} onClose={onClosePanel} />
-        );
-      case "discover":
-        return (
-          <DiscoverPanel workspaceId={workspace.id} onClose={onClosePanel} />
         );
       case "chat":
         return (
