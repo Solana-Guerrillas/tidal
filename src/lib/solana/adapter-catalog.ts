@@ -138,6 +138,47 @@ const KAMINO_ENTRY: AdapterCatalogEntry = {
   inputDecimals: 6,
 };
 
+const KAMINO_BORROW_ENTRY: AdapterCatalogEntry = {
+  catalogItem: {
+    id: "kamino-supply-and-borrow",
+    title: "Supply & Borrow on Kamino",
+    description:
+      "Deposit SOL collateral into the Kamino main market and borrow USDC against it in a single transaction. Foundation for leverage loops.",
+    group: "strategy",
+    nodeKind: "strategy",
+    supportedInputAssets: ["SOL"],
+    primaryOutputAsset: "USDC",
+    protocolLabel: "Kamino",
+    keywords: ["borrow", "leverage", "loan", "collateral", "kamino"],
+  },
+  actionLabel: "Supply SOL & borrow USDC",
+  // Borrow APY varies; we surface it as a cost rather than a yield.
+  apyDisplay: "variable",
+  apyType: "cost",
+  outputAsset: "USDC",
+  primaryHandleId: "next",
+  primaryHandleLabel: "Borrowed USDC",
+  widgets: [
+    {
+      key: "amount",
+      kind: "number",
+      label: "SOL collateral",
+      min: 0,
+      default: 0.05,
+      required: true,
+    },
+    {
+      key: "borrowAmount",
+      kind: "number",
+      label: "USDC to borrow",
+      min: 0,
+      default: 5,
+      required: true,
+    },
+  ],
+  inputDecimals: 9,
+};
+
 const JUPITER_SWAP_ENTRY: AdapterCatalogEntry = {
   catalogItem: {
     // Id kept as "jupiter-swap-sol-usdc" for backwards compat with the
@@ -207,6 +248,7 @@ const JUPITER_SWAP_ENTRY: AdapterCatalogEntry = {
 export const ADAPTER_CATALOG_ENTRIES: AdapterCatalogEntry[] = [
   JITO_ENTRY,
   KAMINO_ENTRY,
+  KAMINO_BORROW_ENTRY,
   JUPITER_SWAP_ENTRY,
 ];
 

@@ -2,7 +2,6 @@ import "server-only";
 
 import {
   KaminoAction,
-  KaminoMarket,
   PROGRAM_ID,
   VanillaObligation,
 } from "@kamino-finance/klend-sdk";
@@ -10,69 +9,36 @@ import { address } from "@solana/kit";
 import { createNoopSigner } from "@solana/signers";
 import {
   PublicKey,
-  TransactionInstruction,
   TransactionMessage,
   VersionedTransaction,
 } from "@solana/web3.js";
 
 import { getAdapterCatalogEntry } from "./adapter-catalog";
 import { getSolanaRpc, getSolanaWeb3Connection } from "./connection";
+import {
+  KAMINO_PROTOCOL_METADATA,
+  USDC_MINT_ADDRESS,
+  kitIxToWeb3Ix,
+  loadKaminoMainMarket,
+  type KitInstruction,
+} from "./kamino-shared";
 import type {
   APYQuote,
   BuildTransactionParams,
   BuildTransactionResult,
   PositionSnapshot,
   ProtocolAdapter,
-  ProtocolMetadata,
   ReadPositionParams,
   WidgetSchema,
 } from "./types";
 
-export const USDC_MINT_ADDRESS =
-  "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
-
-// Kamino main market (primary USDC/SOL lending market on Solana mainnet).
-export const KAMINO_MAIN_MARKET_ADDRESS =
-  "7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF";
-
-// Typical Solana mainnet slot time is ~400-450ms. Kamino uses this to
-// annualize accrued interest for APR/APY calculations.
-const RECENT_SLOT_DURATION_MS = 450;
+// Re-exported for callers that imported these from kamino.ts before the
+// shared-module split (jupiter-swap.ts in particular).
+export { USDC_MINT_ADDRESS, KAMINO_MAIN_MARKET_ADDRESS } from "./kamino-shared";
 
 const ENTRY = getAdapterCatalogEntry("kamino-usdc-supply")!;
 const CATALOG_ITEM = ENTRY.catalogItem;
 const WIDGETS: WidgetSchema[] = ENTRY.widgets;
-
-const PROTOCOL: ProtocolMetadata = {
-  id: "kamino",
-  name: "Kamino",
-  auditCount: 3,
-  tvlUsd: 3_000_000_000,
-  ageMonths: 30,
-  riskTier: "shallows",
-};
-
-async function loadMainMarket(): Promise<KaminoMarket> {
-  const rpc = getSolanaRpc();
-  // Kamino's klend-sdk bundles @solana/kit v2; our app uses v6 via Privy's
-  // peer dep. Runtime RPC shape is compatible (JSON-RPC is JSON-RPC) but
-  // the branded types diverge. The casts here pin types at the SDK boundary.
-  const market = await KaminoMarket.load(
-    rpc as unknown as Parameters<typeof KaminoMarket.load>[0],
-    address(KAMINO_MAIN_MARKET_ADDRESS) as unknown as Parameters<
-      typeof KaminoMarket.load
-    >[1],
-    RECENT_SLOT_DURATION_MS,
-    PROGRAM_ID,
-    true,
-  );
-  if (!market) {
-    throw new Error(
-      `Kamino main market not found at ${KAMINO_MAIN_MARKET_ADDRESS}`,
-    );
-  }
-  return market;
-}
 
 async function readPosition(
   params: ReadPositionParams,
@@ -88,7 +54,7 @@ async function readPosition(
 
 async function readRate(): Promise<APYQuote> {
   const rpc = getSolanaRpc();
-  const market = await loadMainMarket();
+  const market = await loadKaminoMainMarket();
   const reserve = market.getReserveByMint(
     address(USDC_MINT_ADDRESS) as unknown as Parameters<
       typeof market.getReserveByMint
@@ -111,26 +77,6 @@ async function readRate(): Promise<APYQuote> {
   };
 }
 
-type KitInstruction = {
-  programAddress: string;
-  accounts?: ReadonlyArray<{ address: string; role: number }>;
-  data?: Uint8Array;
-};
-
-// @solana/instructions AccountRole is a 2-bit field: bit 0 = writable,
-// bit 1 = signer. Using bit math sidesteps the kit v2/v6 enum mismatch.
-function kitIxToWeb3Ix(ix: KitInstruction): TransactionInstruction {
-  return new TransactionInstruction({
-    programId: new PublicKey(ix.programAddress),
-    keys: (ix.accounts ?? []).map((acc) => ({
-      pubkey: new PublicKey(acc.address),
-      isSigner: (acc.role & 0b10) !== 0,
-      isWritable: (acc.role & 0b01) !== 0,
-    })),
-    data: Buffer.from(ix.data ?? new Uint8Array()),
-  });
-}
-
 async function buildTransaction(
   params: BuildTransactionParams,
 ): Promise<BuildTransactionResult> {
@@ -141,7 +87,7 @@ async function buildTransaction(
     );
   }
 
-  const market = await loadMainMarket();
+  const market = await loadKaminoMainMarket();
 
   const owner = createNoopSigner(address(params.walletPublicKey));
   const obligation = new VanillaObligation(PROGRAM_ID);
@@ -194,7 +140,7 @@ export const kaminoUsdcSupplyAdapter: ProtocolAdapter = {
   catalogItemId: CATALOG_ITEM.id,
   catalogItem: CATALOG_ITEM,
   widgets: WIDGETS,
-  protocol: PROTOCOL,
+  protocol: KAMINO_PROTOCOL_METADATA,
   readPosition,
   readRate,
   buildTransaction,
