@@ -23,6 +23,25 @@ export type PositionSnapshot = {
     displayAmount: string;
     valueUsd?: number;
   };
+  /**
+   * Optional debt context for adapters that open borrow positions
+   * (e.g., Kamino supply-and-borrow). When set, the investment
+   * tracker renders this alongside the primary position so users see
+   * "0.02 SOL collateral · 1 USDC borrowed" as a single line.
+   */
+  debt?: {
+    asset: string;
+    rawAmount: bigint;
+    displayAmount: string;
+    valueUsd?: number;
+  };
+  /**
+   * Health factor: ratio of deposited value to borrowed value. Set
+   * when the position has debt; undefined for pure-supply positions.
+   * < 1.0 means underwater (liquidatable). Adapters compute this in
+   * USD via on-chain oracle prices.
+   */
+  healthFactor?: number;
   lastUpdatedAt: number;
 };
 

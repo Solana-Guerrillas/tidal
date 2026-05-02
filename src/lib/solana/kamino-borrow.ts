@@ -77,12 +77,64 @@ function actionToOrderedIxs(
 async function readPosition(
   params: ReadPositionParams,
 ): Promise<PositionSnapshot | null> {
-  // Borrow obligations contain both supplied collateral and outstanding
-  // debt. Real position reads (supplied SOL, borrowed USDC, current
-  // health factor) are deferred to the investment-tracker work in Tier
-  // 1 #4. Returning null until then avoids surfacing partial data.
-  void params;
-  return null;
+  const market = await loadKaminoMainMarket();
+  type GetObligation = Parameters<typeof market.getObligationByWallet>;
+  const obligation = await market.getObligationByWallet(
+    address(params.walletPublicKey) as unknown as GetObligation[0],
+    new VanillaObligation(PROGRAM_ID) as unknown as GetObligation[1],
+  );
+  if (!obligation) return null;
+
+  const solMint = address(SOL_MINT_ADDRESS);
+  const usdcMint = address(USDC_MINT_ADDRESS);
+
+  // Collateral: SOL deposit. Debt: USDC borrow. Either may be absent
+  // if the user has a Kamino position but not the SOL/USDC pair this
+  // adapter cares about — return null so the supply adapter takes
+  // primary responsibility for surfacing pure USDC supply positions.
+  const deposits = obligation.getDeposits();
+  const borrows = obligation.getBorrows();
+  const solCollateral = deposits.find(
+    (p) => p.mintAddress.toString() === solMint.toString(),
+  );
+  const usdcDebt = borrows.find(
+    (p) => p.mintAddress.toString() === usdcMint.toString(),
+  );
+  if (!solCollateral || !usdcDebt) return null;
+
+  const collateralLamports = BigInt(solCollateral.amount.floor().toString());
+  const collateralSol = Number(collateralLamports) / 1_000_000_000;
+  const collateralUsd = Number(solCollateral.marketValueRefreshed);
+
+  const debtRaw = BigInt(usdcDebt.amount.ceil().toString());
+  const debtUsdc = Number(debtRaw) / 1_000_000;
+  const debtUsd = Number(usdcDebt.marketValueRefreshed);
+
+  // Health factor = total deposited USD value / total borrowed USD
+  // value. Below 1.0 means the obligation is underwater. Above ~1.4
+  // is the typical "comfortable" zone depending on reserve LTV.
+  const healthFactor =
+    debtUsd > 0
+      ? Number(obligation.refreshedStats.userTotalDeposit) / debtUsd
+      : undefined;
+
+  return {
+    asset: "SOL collateral (Kamino)",
+    rawAmount: collateralLamports,
+    displayAmount: `${collateralSol.toFixed(4)} SOL`,
+    valueUsd: Number.isFinite(collateralUsd) ? collateralUsd : undefined,
+    debt: {
+      asset: "USDC borrowed",
+      rawAmount: debtRaw,
+      displayAmount: `${debtUsdc.toFixed(2)} USDC`,
+      valueUsd: Number.isFinite(debtUsd) ? debtUsd : undefined,
+    },
+    healthFactor:
+      healthFactor !== undefined && Number.isFinite(healthFactor)
+        ? healthFactor
+        : undefined,
+    lastUpdatedAt: Date.now(),
+  };
 }
 
 async function readRate(): Promise<APYQuote | null> {

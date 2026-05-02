@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useWallets } from "@privy-io/react-auth/solana";
 
+import { useChainStateSignal } from "@/providers/chain-state-signal-provider";
+
 const USDC_MINT_ADDRESS = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 
 export type AssetBalance = {
@@ -128,6 +130,7 @@ export function useWalletBalances() {
   const { wallets } = useWallets();
   const wallet = wallets[0];
   const address = wallet?.address;
+  const { signal } = useChainStateSignal();
   const [state, setState] = useState<State>({ kind: "no-wallet" });
 
   const refetch = useCallback(async () => {
@@ -148,14 +151,15 @@ export function useWalletBalances() {
     }
   }, [address]);
 
-  // Refetch on mount and when the wallet address changes. The "set
-  // state in an effect" rule is a guideline; here it's the right call
+  // Refetch on mount, when the wallet address changes, and whenever
+  // the chain-state signal bumps (after a successful canvas run or AI
+  // compose run). The "set state in an effect" rule is suppressed
   // because the data lives off-chain and we explicitly want to fetch
-  // when the component sees a new wallet.
+  // when any of these inputs change.
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     void refetch();
-  }, [refetch]);
+  }, [refetch, signal]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
   return { state, refetch };

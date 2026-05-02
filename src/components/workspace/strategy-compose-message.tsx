@@ -12,6 +12,7 @@ import {
 } from "@/lib/workspace/graph-exec";
 import { useAdapterNodeRunner } from "@/hooks/workspace/use-adapter-node-runner";
 import { cn } from "@/lib/utils";
+import { useChainStateSignal } from "@/providers/chain-state-signal-provider";
 
 type StrategyComposeMessageProps = {
   output: ComposeStrategyOutput;
@@ -27,6 +28,7 @@ export function StrategyComposeMessage({
 }: StrategyComposeMessageProps) {
   const { wallets } = useWallets();
   const runNode = useAdapterNodeRunner();
+  const { bumpSignal } = useChainStateSignal();
   const [runState, setRunState] = useState<RunState>({ kind: "idle" });
 
   const hasWallet = wallets.length > 0;
@@ -56,8 +58,12 @@ export function StrategyComposeMessage({
       }
     } finally {
       setRunState({ kind: "done", events: [...events] });
+      // Trigger wallet balance + positions refetch in any subscribed
+      // panels (Investments, wallet node) so the UI reflects whatever
+      // landed on chain. Fires even on partial-success runs.
+      bumpSignal();
     }
-  }, [output, runNode]);
+  }, [output, runNode, bumpSignal]);
 
   const isRunning = runState.kind === "running";
   const events =

@@ -11,6 +11,7 @@ import {
   type GraphExecutionEvent,
 } from "@/lib/workspace/graph-exec";
 import { cn } from "@/lib/utils";
+import { useChainStateSignal } from "@/providers/chain-state-signal-provider";
 import { useWorkspace } from "@/providers/workspace-provider";
 
 type RunState =
@@ -30,6 +31,7 @@ export function CanvasRunPanel() {
   const { workspace } = useWorkspace();
   const { wallets } = useWallets();
   const runNode = useAdapterNodeRunner();
+  const { bumpSignal } = useChainStateSignal();
   const [state, setState] = useState<RunState>({ kind: "idle" });
   const hasWallet = wallets.length > 0;
 
@@ -60,8 +62,13 @@ export function CanvasRunPanel() {
       }
     } finally {
       setState({ kind: "done", events: [...events], failed });
+      // Even when failed=true, some node-succeeded events may have
+      // landed before failure (e.g., deposit succeeded, borrow failed).
+      // Bumping the signal triggers wallet/positions refetch so the
+      // UI catches up to whatever DID settle.
+      bumpSignal();
     }
-  }, [workspace, runNode]);
+  }, [workspace, runNode, bumpSignal]);
 
   const isRunning = state.kind === "running";
 

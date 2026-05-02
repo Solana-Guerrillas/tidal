@@ -43,13 +43,38 @@ const WIDGETS: WidgetSchema[] = ENTRY.widgets;
 async function readPosition(
   params: ReadPositionParams,
 ): Promise<PositionSnapshot | null> {
-  // Obligation reading is deferred until the write path lands. Users
-  // that have not deposited into Kamino do not have an obligation
-  // account, and returning null for them is the correct shape. Real
-  // obligation reads for existing depositors arrive in the follow-up
-  // commit alongside buildTransaction.
-  void params;
-  return null;
+  const market = await loadKaminoMainMarket();
+  type GetObligation = Parameters<typeof market.getObligationByWallet>;
+  const obligation = await market.getObligationByWallet(
+    address(params.walletPublicKey) as unknown as GetObligation[0],
+    new VanillaObligation(PROGRAM_ID) as unknown as GetObligation[1],
+  );
+  if (!obligation) return null;
+
+  // Find the USDC deposit position. Users may have other deposits
+  // (e.g., SOL collateral from the supply-and-borrow adapter) — those
+  // are surfaced by their respective adapters; this one only reports
+  // the USDC supply leg.
+  const usdcMint = address(USDC_MINT_ADDRESS);
+  const deposits = obligation.getDeposits();
+  const usdcDeposit = deposits.find(
+    (p) => p.mintAddress.toString() === usdcMint.toString(),
+  );
+  if (!usdcDeposit) return null;
+
+  // Position.amount is in raw base units (USDC has 6 decimals).
+  // marketValueRefreshed is the USD value at the last refresh.
+  const rawAmount = BigInt(usdcDeposit.amount.floor().toString());
+  const usdcWhole = Number(rawAmount) / 1_000_000;
+  const valueUsd = Number(usdcDeposit.marketValueRefreshed);
+
+  return {
+    asset: "USDC supplied (Kamino)",
+    rawAmount,
+    displayAmount: `${usdcWhole.toFixed(2)} USDC`,
+    valueUsd: Number.isFinite(valueUsd) ? valueUsd : undefined,
+    lastUpdatedAt: Date.now(),
+  };
 }
 
 async function readRate(): Promise<APYQuote> {
