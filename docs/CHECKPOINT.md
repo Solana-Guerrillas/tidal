@@ -219,7 +219,7 @@ Verified `38f7502` in browser: regression where bidirectional swap broke edge co
 
 ## Next Session Starts Here — Tier 1.6 inverse paths (~2.5-3 hrs)
 
-Submission target ~2026-05-10. **8 days runway.** Tier 1 #1, #2, and #4 closed. Remaining Tier 1 work + new Tier 1.6 sprint queued below.
+Submission target ~2026-05-10. **7 days runway.** Tier 1 #1, #2, #4 closed. #5 dropped 2026-05-03 (see Parked Features in CLAUDE.md). Remaining Tier 1 work + Tier 1.6 sprint queued below.
 
 ### Tier 1 — must ship
 
@@ -228,7 +228,7 @@ Submission target ~2026-05-10. **8 days runway.** Tier 1 #1, #2, and #4 closed. 
 | 1 | Remove Discover panel | ~25 min | ✅ Done `2196d13` |
 | 2 | Kamino borrow adapter | ~3-4 hrs | ✅ Done `16f0037` (mainnet verified 2026-05-01) |
 | 4 | Investment tracker + Kamino position reads | ~3-3.5 hrs | ✅ Done `545aebc` (mainnet verified 2026-05-02) |
-| **5** | **Active position locking** | **~45 min** | **next** — gate the × on adapter strategy nodes whose adapter has an active on-chain position. Visual indicator (lock icon, border tint). Now has real position data via `useAllPositions` to gate on. |
+| ~~5~~ | ~~Active position locking~~ | ~~~45 min~~ | **Dropped 2026-05-03.** Conflated "active position" with "any matching adapter," which would lock fresh strategy nodes across multi-session / multi-strategy use. Coverage moved to Investments panel (source of truth) + inverse-path adapters (close from canvas). See CLAUDE.md "Parked Features" for the full reasoning + revival path. |
 | **3** | **Leverage loop composite node** | **~2-3 hrs** | After Tier 1.6. Composite "Leverage Loop on Kamino" node with widgets `collateralAsset`, `loopCount`, `targetLTV`. Internally expands to N rounds of supply→borrow→swap via `executeGraph`. With Tier 1.6 inverses landed, also unlocks an "unwind leverage" composite. |
 
 ### Tier 1.6 — inverse paths sprint (~2.5-3 hrs, NEW — slot before Tier 1 #3)
@@ -303,7 +303,7 @@ Recommended next sprint. Each adapter mirrors an existing supply/stake adapter a
 | Kamino supply-and-borrow adapter | ✅ Done + mainnet verified 2026-05-01 |
 | Live investment tracker + real Kamino position reads | ✅ Done + mainnet verified 2026-05-02 |
 | Chain-state signal provider (auto-refresh after runs) | ✅ Done |
-| **Active position locking** | **next (Tier 1 #5)** |
+| Active position locking | Dropped 2026-05-03 (parked — see CLAUDE.md) |
 | **Inverse paths: Kamino withdraw, Jito unstake, Kamino repay+withdraw** | **next sprint (Tier 1.6)** |
 | Leverage loop composite node | After Tier 1.6 |
 
