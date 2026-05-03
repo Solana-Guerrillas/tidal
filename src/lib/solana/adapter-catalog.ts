@@ -138,6 +138,43 @@ const KAMINO_ENTRY: AdapterCatalogEntry = {
   inputDecimals: 6,
 };
 
+const KAMINO_WITHDRAW_ENTRY: AdapterCatalogEntry = {
+  catalogItem: {
+    id: "kamino-usdc-withdraw",
+    title: "Withdraw USDC from Kamino",
+    description:
+      "Withdraw your supplied USDC (plus accrued interest) from the Kamino main market. Closes part or all of a USDC supply position.",
+    group: "strategy",
+    nodeKind: "strategy",
+    // Input is the kUSDC position (not a token in the wallet); typed
+    // as kUSDC so an upstream Kamino-supply node's primary output can
+    // wire into this withdraw node naturally.
+    supportedInputAssets: ["kUSDC"],
+    primaryOutputAsset: "USDC",
+    protocolLabel: "Kamino",
+    keywords: ["withdraw", "exit", "redeem", "kamino", "lending", "unwind"],
+  },
+  actionLabel: "Withdraw USDC",
+  apyDisplay: "n/a",
+  apyType: "earn",
+  outputAsset: "USDC",
+  primaryHandleId: "next",
+  primaryHandleLabel: "Withdrawn USDC",
+  widgets: [
+    {
+      key: "amount",
+      kind: "number",
+      label: "Amount to withdraw (USDC)",
+      min: 0,
+      default: 0.5,
+      required: true,
+    },
+  ],
+  // Withdraw amount is in USDC base units (6 decimals), regardless of
+  // upstream input shape.
+  inputDecimals: 6,
+};
+
 const KAMINO_BORROW_ENTRY: AdapterCatalogEntry = {
   catalogItem: {
     id: "kamino-supply-and-borrow",
@@ -248,6 +285,7 @@ const JUPITER_SWAP_ENTRY: AdapterCatalogEntry = {
 export const ADAPTER_CATALOG_ENTRIES: AdapterCatalogEntry[] = [
   JITO_ENTRY,
   KAMINO_ENTRY,
+  KAMINO_WITHDRAW_ENTRY,
   KAMINO_BORROW_ENTRY,
   JUPITER_SWAP_ENTRY,
 ];
