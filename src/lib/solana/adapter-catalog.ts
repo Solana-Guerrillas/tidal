@@ -208,6 +208,47 @@ const KAMINO_WITHDRAW_ENTRY: AdapterCatalogEntry = {
   inputDecimals: 6,
 };
 
+const KAMINO_REPAY_WITHDRAW_ENTRY: AdapterCatalogEntry = {
+  catalogItem: {
+    id: "kamino-repay-and-withdraw",
+    title: "Repay & Withdraw on Kamino",
+    description:
+      "Repay your USDC debt and withdraw your SOL collateral from the Kamino main market. Closes a supply-and-borrow obligation in two transactions.",
+    group: "strategy",
+    nodeKind: "strategy",
+    supportedInputAssets: ["USDC"],
+    primaryOutputAsset: "SOL",
+    protocolLabel: "Kamino",
+    keywords: ["repay", "close", "exit", "kamino", "borrow", "unwind", "withdraw"],
+  },
+  actionLabel: "Repay USDC & withdraw SOL",
+  apyDisplay: "n/a",
+  apyType: "earn",
+  outputAsset: "SOL",
+  primaryHandleId: "next",
+  primaryHandleLabel: "Withdrawn SOL",
+  widgets: [
+    {
+      key: "amount",
+      kind: "number",
+      label: "USDC to repay",
+      min: 0,
+      default: 1,
+      required: true,
+    },
+    {
+      key: "collateralAmount",
+      kind: "number",
+      label: "SOL collateral to withdraw",
+      min: 0,
+      default: 0.02,
+      required: true,
+    },
+  ],
+  // Repay amount is in USDC base units (6 decimals).
+  inputDecimals: 6,
+};
+
 const KAMINO_BORROW_ENTRY: AdapterCatalogEntry = {
   catalogItem: {
     id: "kamino-supply-and-borrow",
@@ -321,6 +362,7 @@ export const ADAPTER_CATALOG_ENTRIES: AdapterCatalogEntry[] = [
   KAMINO_ENTRY,
   KAMINO_WITHDRAW_ENTRY,
   KAMINO_BORROW_ENTRY,
+  KAMINO_REPAY_WITHDRAW_ENTRY,
   JUPITER_SWAP_ENTRY,
 ];
 

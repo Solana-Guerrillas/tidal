@@ -5,6 +5,7 @@ import { jitoSolUnstakeAdapter } from "./jito-unstake";
 import { jupiterSolUsdcSwapAdapter } from "./jupiter-swap";
 import { kaminoUsdcSupplyAdapter } from "./kamino";
 import { kaminoSupplyAndBorrowAdapter } from "./kamino-borrow";
+import { kaminoRepayAndWithdrawAdapter } from "./kamino-repay-withdraw";
 import { kaminoUsdcWithdrawAdapter } from "./kamino-withdraw";
 import { registerAdapter } from "./registry";
 
@@ -17,6 +18,7 @@ export function registerAllAdapters(): void {
   registerAdapter(kaminoUsdcSupplyAdapter);
   registerAdapter(kaminoUsdcWithdrawAdapter);
   registerAdapter(kaminoSupplyAndBorrowAdapter);
+  registerAdapter(kaminoRepayAndWithdrawAdapter);
   registerAdapter(jupiterSolUsdcSwapAdapter);
   registered = true;
 }
