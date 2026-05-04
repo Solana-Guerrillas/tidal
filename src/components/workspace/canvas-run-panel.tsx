@@ -12,6 +12,7 @@ import {
 } from "@/lib/workspace/graph-exec";
 import { cn } from "@/lib/utils";
 import { useChainStateSignal } from "@/providers/chain-state-signal-provider";
+import { useRunStatus } from "@/providers/run-status-provider";
 import { useWorkspace } from "@/providers/workspace-provider";
 
 type RunState =
@@ -32,6 +33,7 @@ export function CanvasRunPanel() {
   const { wallets } = useWallets();
   const runNode = useAdapterNodeRunner();
   const { bumpSignal } = useChainStateSignal();
+  const { applyEvent } = useRunStatus();
   const [state, setState] = useState<RunState>({ kind: "idle" });
   const hasWallet = wallets.length > 0;
 
@@ -61,6 +63,9 @@ export function CanvasRunPanel() {
         runNode,
       })) {
         events.push(event);
+        // Mirror to the per-node status provider so canvas nodes can
+        // paint their borders by lifecycle state.
+        applyEvent(event);
         if (
           event.kind === "node-failed" ||
           event.kind === "graph-failed" ||
@@ -78,7 +83,7 @@ export function CanvasRunPanel() {
       // UI catches up to whatever DID settle.
       bumpSignal();
     }
-  }, [workspace, runNode, bumpSignal]);
+  }, [workspace, runNode, bumpSignal, applyEvent]);
 
   const isRunning = state.kind === "running";
 

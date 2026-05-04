@@ -7,6 +7,7 @@ import { WorkspaceProvider } from "@/providers/workspace-provider";
 import { SidePanelProvider } from "@/providers/side-panel-provider";
 import { PreferenceProfileProvider } from "@/providers/preference-profile-provider";
 import { ChainStateSignalProvider } from "@/providers/chain-state-signal-provider";
+import { RunStatusProvider } from "@/providers/run-status-provider";
 import { PrivyProvider } from "@/components/providers/privy-provider";
 import { AppHeader } from "@/components/tidal/app-header";
 import { AppSidebar } from "@/components/tidal/app-sidebar";
@@ -31,6 +32,7 @@ export default function RootLayout({
       <body className="flex h-screen flex-col overflow-hidden">
         <PrivyProvider>
           <ChainStateSignalProvider>
+            <RunStatusProvider>
             <TooltipProvider>
               <PreferenceProfileProvider>
                 <WorkspaceProvider>
@@ -48,6 +50,7 @@ export default function RootLayout({
                 </WorkspaceProvider>
               </PreferenceProfileProvider>
             </TooltipProvider>
+            </RunStatusProvider>
           </ChainStateSignalProvider>
         </PrivyProvider>
       </body>

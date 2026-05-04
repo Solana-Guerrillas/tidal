@@ -16,6 +16,8 @@ import { useWorkspaceBuilderContext } from "@/components/workspace/workspace-bui
 import { useAdapterRate, formatApy } from "@/hooks/workspace/use-adapter-rate";
 import { formatWorkspaceNodeStatusLabel } from "@/lib/workspace/status";
 import { getAdapterCatalogEntry } from "@/lib/solana/adapter-catalog";
+import { useNodeRunStatus } from "@/providers/run-status-provider";
+import { runStatusRingClass } from "@/lib/workspace/run-status-styles";
 import {
   collectIntervals,
   type StrategyNodeType,
@@ -33,6 +35,7 @@ export const StrategyNode = memo(
       : undefined;
     const widgetValues = data.widgetValues ?? {};
     const reactFlow = useReactFlow();
+    const runStatus = useNodeRunStatus(id);
     const rateState = useAdapterRate(data.catalogItemId);
     const liveApy =
       rateState.kind === "ready" && rateState.rate
@@ -57,7 +60,10 @@ export const StrategyNode = memo(
         : data.action;
 
     return (
-      <SurfaceCard className="w-[280px] bg-[#15202E]" padding="none">
+      <SurfaceCard
+        className={`w-[280px] bg-[#15202E] transition-shadow ${runStatusRingClass(runStatus)}`}
+        padding="none"
+      >
         <Handle
           type="target"
           position={Position.Left}

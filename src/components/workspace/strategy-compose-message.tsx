@@ -13,6 +13,7 @@ import {
 import { useAdapterNodeRunner } from "@/hooks/workspace/use-adapter-node-runner";
 import { cn } from "@/lib/utils";
 import { useChainStateSignal } from "@/providers/chain-state-signal-provider";
+import { useRunStatus } from "@/providers/run-status-provider";
 
 type StrategyComposeMessageProps = {
   output: ComposeStrategyOutput;
@@ -29,6 +30,7 @@ export function StrategyComposeMessage({
   const { wallets } = useWallets();
   const runNode = useAdapterNodeRunner();
   const { bumpSignal } = useChainStateSignal();
+  const { applyEvent } = useRunStatus();
   const [runState, setRunState] = useState<RunState>({ kind: "idle" });
 
   const hasWallet = wallets.length > 0;
@@ -58,6 +60,9 @@ export function StrategyComposeMessage({
         runNode,
       })) {
         events.push(event);
+        // Mirror to the per-node status provider so canvas nodes can
+        // paint their borders by lifecycle state.
+        applyEvent(event);
         setRunState({ kind: "running", events: [...events] });
       }
     } finally {
@@ -67,7 +72,7 @@ export function StrategyComposeMessage({
       // landed on chain. Fires even on partial-success runs.
       bumpSignal();
     }
-  }, [output, runNode, bumpSignal]);
+  }, [output, runNode, bumpSignal, applyEvent]);
 
   const isRunning = runState.kind === "running";
   const events =

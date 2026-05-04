@@ -7,15 +7,20 @@ import { Badge } from "@/components/tidal/badge";
 import { SurfaceCard } from "@/components/tidal/surface-card";
 import { useWorkspaceBuilderContext } from "@/components/workspace/workspace-builder-context";
 import { formatWorkspaceNodeStatusLabel } from "@/lib/workspace/status";
+import { runStatusRingClass } from "@/lib/workspace/run-status-styles";
+import { useNodeRunStatus } from "@/providers/run-status-provider";
 import type { SplitNodeType } from "@/mock-data/workspace/types";
 
 export const SplitNode = memo(
   ({ id, data, isConnectable }: NodeProps<SplitNodeType>) => {
     const builderContext = useWorkspaceBuilderContext();
     const isEditable = builderContext?.isEditable ?? false;
+    const runStatus = useNodeRunStatus(id);
 
     return (
-      <SurfaceCard className="w-[280px] bg-[#15202E]">
+      <SurfaceCard
+        className={`w-[280px] bg-[#15202E] transition-shadow ${runStatusRingClass(runStatus)}`}
+      >
         <Handle
           type="target"
           position={Position.Left}
