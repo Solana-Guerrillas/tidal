@@ -84,9 +84,30 @@ export function StrategyComposeMessage({
         <span className="tidal-text-eyebrow text-tidal-accent">
           Composed strategy
         </span>
-        <span className="text-[11px] text-tidal-muted">{output.intent}</span>
+        <span className="rounded-full bg-tidal-accent/10 px-2 py-0.5 text-[10px] font-medium text-tidal-accent">
+          {output.riskTier}
+        </span>
       </div>
       <p className="tidal-text-message">{output.summary}</p>
+      {output.protocols.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5">
+          {output.protocols.map((protocol, i) => (
+            <span key={`${protocol}-${i}`} className="flex items-center gap-1.5">
+              <span className="rounded-md border border-tidal-border bg-tidal-card px-1.5 py-0.5 text-[10px] font-medium text-foreground">
+                {protocol}
+              </span>
+              {i < output.protocols.length - 1 && (
+                <span className="text-[10px] text-tidal-muted">→</span>
+              )}
+            </span>
+          ))}
+        </div>
+      )}
+      {output.rationale && (
+        <p className="text-[11px] leading-relaxed text-tidal-muted">
+          {output.rationale}
+        </p>
+      )}
       {output.warnings.length > 0 && (
         <ul className="list-inside list-disc text-[11px] text-amber-400">
           {output.warnings.map((w, i) => (

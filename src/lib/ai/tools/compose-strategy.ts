@@ -44,6 +44,22 @@ export type ComposeStrategyInput = z.infer<typeof inputSchema>;
 export type ComposeStrategyOutput = {
   intent: StrategyIntent;
   summary: string;
+  /**
+   * Protocol pills surfaced on the compose card (e.g., ["Jupiter",
+   * "Kamino"]). Order matches strategy flow direction.
+   */
+  protocols: string[];
+  /**
+   * One-line "why this works" rationale. Renders below the summary on
+   * the compose card. Keep under ~120 chars — judges scan, they don't
+   * read paragraphs.
+   */
+  rationale: string;
+  /**
+   * Risk tier label ("Shallows" | "Mid-Depth" | "Deep Water"). Surfaced
+   * as a pill on the card so users grok the risk profile at a glance.
+   */
+  riskTier: string;
   mutations: GraphMutation[];
   executable: {
     nodes: SerializableExecutableNode[];
@@ -65,6 +81,9 @@ type SerializableExecutableNode = {
 type StrategyTemplate = {
   intent: StrategyIntent;
   summary: (sourceAmount: bigint) => string;
+  protocols: string[];
+  rationale: string;
+  riskTier: string;
   build: (sourceAmount: bigint) => {
     nodes: StrategyNodeType[];
     edges: WorkspaceGraphEdge[];
@@ -153,8 +172,12 @@ const TEMPLATES: Record<StrategyIntent, StrategyTemplate> = {
   "liquid-stake-sol": {
     intent: "liquid-stake-sol",
     defaultSourceAmount: 10_000_000n, // 0.01 SOL
+    protocols: ["Jito"],
+    riskTier: "Shallows",
+    rationale:
+      "Jito is the highest-volume Solana stake pool — JitoSOL keeps your stake liquid and captures MEV tips on top of base staking yield.",
     summary: (amount) =>
-      `Stake ${lamportsToSolLabel(amount)} into JitoSOL via the Jito stake pool. Liquid staking position with MEV tips. Shallows risk tier.`,
+      `Stake ${lamportsToSolLabel(amount)} into JitoSOL via the Jito stake pool. Liquid staking position with MEV tips.`,
     build: (sourceAmount) => {
       const node = strategyNodeFromAdapter({
         catalogItemId: JITO_ID,
@@ -187,8 +210,12 @@ const TEMPLATES: Record<StrategyIntent, StrategyTemplate> = {
   "lend-usdc-kamino": {
     intent: "lend-usdc-kamino",
     defaultSourceAmount: 1_000_000n, // 1 USDC (6 decimals)
+    protocols: ["Kamino"],
+    riskTier: "Shallows",
+    rationale:
+      "Kamino main market has the deepest USDC supply liquidity on Solana — predictable variable APY, withdrawable on demand.",
     summary: (amount) =>
-      `Supply ${rawUsdcToUsdcLabel(amount)} into the Kamino main market USDC reserve. Variable supply APY. Shallows risk tier.`,
+      `Supply ${rawUsdcToUsdcLabel(amount)} into the Kamino main market USDC reserve. Variable supply APY.`,
     build: (sourceAmount) => {
       const node = strategyNodeFromAdapter({
         catalogItemId: KAMINO_ID,
@@ -216,8 +243,12 @@ const TEMPLATES: Record<StrategyIntent, StrategyTemplate> = {
   "swap-sol-then-supply-usdc": {
     intent: "swap-sol-then-supply-usdc",
     defaultSourceAmount: 10_000_000n, // 0.01 SOL
+    protocols: ["Jupiter", "Kamino"],
+    riskTier: "Shallows",
+    rationale:
+      "Jupiter routes the swap across every Solana DEX for best price; Kamino then earns supply APY on the USDC. The graph runs as two sequential transactions.",
     summary: (amount) =>
-      `Swap ${lamportsToSolLabel(amount)} into USDC via Jupiter Ultra, then supply the resulting USDC into the Kamino main market. Two-hop strategy: best-of-route swap, then variable supply APY. Shallows risk tier overall.`,
+      `Swap ${lamportsToSolLabel(amount)} into USDC via Jupiter Ultra, then supply the resulting USDC into the Kamino main market.`,
     build: (sourceAmount) => {
       const swap = strategyNodeFromAdapter({
         catalogItemId: JUPITER_ID,
@@ -309,6 +340,9 @@ export const composeStrategyTool = tool({
     return {
       intent,
       summary: template.summary(amount),
+      protocols: template.protocols,
+      rationale: template.rationale,
+      riskTier: template.riskTier,
       mutations,
       executable: {
         nodes: built.executableNodes.map(serializeExecutableNode),

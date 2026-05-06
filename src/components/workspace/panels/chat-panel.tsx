@@ -87,6 +87,8 @@ export function ChatPanel({
 
   const orderedMessages = [...messages].reverse();
 
+  const showEmptyState = messages.length === 0;
+
   return (
     <PanelShell
       eyebrow="Chat"
@@ -151,6 +153,15 @@ export function ChatPanel({
         ) : null}
 
         <div className="flex min-h-0 flex-1 flex-col-reverse gap-4 overflow-y-auto pr-1">
+          {showEmptyState ? (
+            <ChatEmptyState
+              disabled={!authenticated || isBusy}
+              onPick={(prompt) => {
+                if (!authenticated) return;
+                sendMessage({ text: prompt });
+              }}
+            />
+          ) : null}
           {orderedMessages.map((message) => (
             <div key={message.id} className="flex flex-col gap-2">
               {message.parts.map((part, partIndex) => {
@@ -249,5 +260,57 @@ export function ChatPanel({
         </div>
       </div>
     </PanelShell>
+  );
+}
+
+const STARTER_PROMPTS = [
+  "Stake 0.05 SOL on Jito",
+  "Lend 5 USDC on Kamino",
+  "Swap 0.05 SOL to USDC and supply on Kamino",
+] as const;
+
+function ChatEmptyState({
+  disabled,
+  onPick,
+}: {
+  disabled: boolean;
+  onPick: (prompt: string) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-3 rounded-[10px] border border-tidal-border bg-tidal-card/40 p-4">
+      <div className="flex flex-col gap-1">
+        <span className="tidal-text-eyebrow text-tidal-accent">
+          Tidekeeper
+        </span>
+        <p className="tidal-text-message text-foreground">
+          I compose Solana DeFi strategies as runnable graphs on the canvas.
+          Tell me what you want to do — staking, lending, swapping, or chained
+          strategies — and I&rsquo;ll build the nodes for you to review and run.
+        </p>
+      </div>
+      <div className="flex flex-col gap-2">
+        <span className="text-[11px] uppercase tracking-wide text-tidal-muted">
+          Try one
+        </span>
+        <div className="flex flex-col gap-1.5">
+          {STARTER_PROMPTS.map((prompt) => (
+            <button
+              key={prompt}
+              type="button"
+              disabled={disabled}
+              onClick={() => onPick(prompt)}
+              className="rounded-md border border-tidal-border bg-background/40 px-3 py-2 text-left text-[12px] text-foreground transition-colors hover:border-tidal-accent/40 hover:bg-tidal-sidebar-active disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {prompt}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="rounded-md border border-tidal-border/60 bg-background/30 px-3 py-2 text-[11px] leading-relaxed text-tidal-muted">
+        <span className="text-foreground">Available adapters: </span>
+        Jito (stake), Kamino (USDC supply), Jupiter Ultra (SOL ↔ USDC swap).
+        I&rsquo;ll never sign or submit anything — you click Run.
+      </div>
+    </div>
   );
 }
