@@ -20,6 +20,7 @@ const STRATEGY_INTENTS = [
   "liquid-stake-sol",
   "lend-usdc-kamino",
   "swap-sol-then-supply-usdc",
+  "leverage-loop-sol-kamino",
 ] as const;
 
 type StrategyIntent = (typeof STRATEGY_INTENTS)[number];
@@ -28,7 +29,7 @@ const inputSchema = z.object({
   intent: z
     .enum(STRATEGY_INTENTS)
     .describe(
-      "Which canonical Tidal strategy to compose. liquid-stake-sol stakes SOL into JitoSOL via Jito stake pool. lend-usdc-kamino supplies USDC into the Kamino main market. swap-sol-then-supply-usdc routes SOL through Jupiter Ultra into USDC, then supplies it to Kamino.",
+      "Which canonical Tidal strategy to compose. liquid-stake-sol stakes SOL into JitoSOL via Jito stake pool. lend-usdc-kamino supplies USDC into the Kamino main market. swap-sol-then-supply-usdc routes SOL through Jupiter Ultra into USDC, then supplies it to Kamino. leverage-loop-sol-kamino composes a single Kamino+Jupiter leverage-loop node that recursively supplies SOL, borrows USDC, and swaps back to SOL — pick this when the user asks for a 'loop', 'leverage', '2x/3x SOL', or similar.",
     ),
   sourceAmount: z
     .string()
@@ -36,6 +37,23 @@ const inputSchema = z.object({
     .optional()
     .describe(
       "Optional override for the source amount in the smallest token unit (lamports for SOL, 6-decimal raw for USDC). If omitted, a small demo default is used.",
+    ),
+  loopCount: z
+    .number()
+    .int()
+    .min(1)
+    .max(3)
+    .optional()
+    .describe(
+      "Only used by leverage-loop-sol-kamino. Number of recursive supply-and-borrow iterations (1-3). When the user says '3x' or 'three times', pass 3. Default 2.",
+    ),
+  targetLTV: z
+    .number()
+    .min(0.3)
+    .max(0.7)
+    .optional()
+    .describe(
+      "Only used by leverage-loop-sol-kamino. Target loan-to-value ratio per iteration (0.3-0.7). Higher = more aggressive leverage; lower = safer. Default 0.5.",
     ),
 });
 
@@ -78,13 +96,19 @@ type SerializableExecutableNode = {
   sourceAmount?: string;
 };
 
+type TemplateBuildOptions = {
+  sourceAmount: bigint;
+  loopCount?: number;
+  targetLTV?: number;
+};
+
 type StrategyTemplate = {
   intent: StrategyIntent;
-  summary: (sourceAmount: bigint) => string;
+  summary: (options: TemplateBuildOptions) => string;
   protocols: string[];
   rationale: string;
   riskTier: string;
-  build: (sourceAmount: bigint) => {
+  build: (options: TemplateBuildOptions) => {
     nodes: StrategyNodeType[];
     edges: WorkspaceGraphEdge[];
     executableNodes: ExecutableNode[];
@@ -97,6 +121,7 @@ type StrategyTemplate = {
 const JITO_ID = "jito-sol-stake";
 const KAMINO_ID = "kamino-usdc-supply";
 const JUPITER_ID = "jupiter-swap-sol-usdc";
+const LEVERAGE_LOOP_ID = "kamino-leverage-loop";
 
 const EDGE_STYLE_MAIN = { stroke: "#61B3CF", strokeWidth: 2 } as const;
 
@@ -108,6 +133,14 @@ function strategyNodeFromAdapter(params: {
   catalogItemId: string;
   position: { x: number; y: number };
   sourceAmountLabel?: string;
+  /**
+   * Pre-populated values for the node's adapter widgets, keyed by
+   * `WidgetSchema.key`. These appear in the node's editable widget
+   * inputs on the canvas the moment the node materialises — not just
+   * in the executable plan. Without this, the user sees blank widgets
+   * even though the AI passed concrete loop counts / LTVs.
+   */
+  widgetValues?: Record<string, unknown>;
 }): StrategyNodeType {
   const adapter = getAdapter(params.catalogItemId);
   if (!adapter) {
@@ -154,6 +187,7 @@ function strategyNodeFromAdapter(params: {
       apy: entry.apyDisplay,
       apyType: entry.apyType,
       catalogItemId: item.id,
+      widgetValues: params.widgetValues,
     },
   };
 }
@@ -176,9 +210,9 @@ const TEMPLATES: Record<StrategyIntent, StrategyTemplate> = {
     riskTier: "Shallows",
     rationale:
       "Jito is the highest-volume Solana stake pool — JitoSOL keeps your stake liquid and captures MEV tips on top of base staking yield.",
-    summary: (amount) =>
-      `Stake ${lamportsToSolLabel(amount)} into JitoSOL via the Jito stake pool. Liquid staking position with MEV tips.`,
-    build: (sourceAmount) => {
+    summary: ({ sourceAmount }) =>
+      `Stake ${lamportsToSolLabel(sourceAmount)} into JitoSOL via the Jito stake pool. Liquid staking position with MEV tips.`,
+    build: ({ sourceAmount }) => {
       const node = strategyNodeFromAdapter({
         catalogItemId: JITO_ID,
         position: { x: 320, y: 240 },
@@ -214,9 +248,9 @@ const TEMPLATES: Record<StrategyIntent, StrategyTemplate> = {
     riskTier: "Shallows",
     rationale:
       "Kamino main market has the deepest USDC supply liquidity on Solana — predictable variable APY, withdrawable on demand.",
-    summary: (amount) =>
-      `Supply ${rawUsdcToUsdcLabel(amount)} into the Kamino main market USDC reserve. Variable supply APY.`,
-    build: (sourceAmount) => {
+    summary: ({ sourceAmount }) =>
+      `Supply ${rawUsdcToUsdcLabel(sourceAmount)} into the Kamino main market USDC reserve. Variable supply APY.`,
+    build: ({ sourceAmount }) => {
       const node = strategyNodeFromAdapter({
         catalogItemId: KAMINO_ID,
         position: { x: 320, y: 240 },
@@ -247,9 +281,9 @@ const TEMPLATES: Record<StrategyIntent, StrategyTemplate> = {
     riskTier: "Shallows",
     rationale:
       "Jupiter routes the swap across every Solana DEX for best price; Kamino then earns supply APY on the USDC. The graph runs as two sequential transactions.",
-    summary: (amount) =>
-      `Swap ${lamportsToSolLabel(amount)} into USDC via Jupiter Ultra, then supply the resulting USDC into the Kamino main market.`,
-    build: (sourceAmount) => {
+    summary: ({ sourceAmount }) =>
+      `Swap ${lamportsToSolLabel(sourceAmount)} into USDC via Jupiter Ultra, then supply the resulting USDC into the Kamino main market.`,
+    build: ({ sourceAmount }) => {
       const swap = strategyNodeFromAdapter({
         catalogItemId: JUPITER_ID,
         position: { x: 200, y: 240 },
@@ -292,6 +326,62 @@ const TEMPLATES: Record<StrategyIntent, StrategyTemplate> = {
       };
     },
   },
+
+  "leverage-loop-sol-kamino": {
+    intent: "leverage-loop-sol-kamino",
+    // 0.05 SOL — large enough that the borrowed USDC clears Kamino's
+    // dust floor across all loop iterations even at lower LTVs.
+    defaultSourceAmount: 50_000_000n,
+    protocols: ["Kamino", "Jupiter"],
+    riskTier: "Deep Water",
+    rationale:
+      "Kamino supplies SOL collateral and lets you borrow USDC against it; Jupiter swaps that USDC back to SOL each round, compounding effective exposure. The runner submits the loop as a sequence of supply→borrow→swap transactions.",
+    summary: ({ sourceAmount, loopCount, targetLTV }) => {
+      const loops = loopCount ?? 2;
+      const ltv = targetLTV ?? 0.5;
+      return `Leverage-loop ${lamportsToSolLabel(sourceAmount)} on Kamino: ${loops.toString()} iteration${loops === 1 ? "" : "s"} of supply-and-borrow at ${(ltv * 100).toFixed(0)}% LTV with Jupiter routing the borrowed USDC back to SOL each round.`;
+    },
+    build: ({ sourceAmount, loopCount, targetLTV }) => {
+      const loops = loopCount ?? 2;
+      const ltv = targetLTV ?? 0.5;
+      const sourceSolDecimal = Number(sourceAmount) / 1_000_000_000;
+      // Same shape goes onto both the visible canvas node (so the user
+      // sees the values pre-populated in the widget inputs) and the
+      // executable plan (so the runner builds with these values when
+      // Run is clicked).
+      const widgets = {
+        amount: sourceSolDecimal,
+        loopCount: loops,
+        targetLTV: ltv,
+      };
+      const node = strategyNodeFromAdapter({
+        catalogItemId: LEVERAGE_LOOP_ID,
+        position: { x: 320, y: 240 },
+        sourceAmountLabel: lamportsToSolLabel(sourceAmount),
+        widgetValues: widgets,
+      });
+      return {
+        nodes: [node],
+        edges: [],
+        executableNodes: [
+          {
+            id: node.id,
+            kind: "adapter",
+            catalogItemId: LEVERAGE_LOOP_ID,
+            widgets,
+            sourceAmount,
+          },
+        ],
+        executableEdges: [],
+        warnings:
+          loops >= 3
+            ? [
+                "3-loop leverage compounds risk — a 30% SOL drawdown can liquidate the position depending on borrow LTV. Demo with small amounts only.",
+              ]
+            : [],
+      };
+    },
+  },
 };
 
 function serializeExecutableNode(
@@ -321,6 +411,8 @@ export const composeStrategyTool = tool({
   execute: async ({
     intent,
     sourceAmount,
+    loopCount,
+    targetLTV,
   }: ComposeStrategyInput): Promise<ComposeStrategyOutput> => {
     registerAllAdapters();
 
@@ -330,7 +422,12 @@ export const composeStrategyTool = tool({
         ? BigInt(sourceAmount)
         : template.defaultSourceAmount;
 
-    const built = template.build(amount);
+    const buildOptions: TemplateBuildOptions = {
+      sourceAmount: amount,
+      loopCount,
+      targetLTV,
+    };
+    const built = template.build(buildOptions);
 
     const mutations: GraphMutation[] = [
       ...built.nodes.map((node) => ({ kind: "add-node" as const, node })),
@@ -339,7 +436,7 @@ export const composeStrategyTool = tool({
 
     return {
       intent,
-      summary: template.summary(amount),
+      summary: template.summary(buildOptions),
       protocols: template.protocols,
       rationale: template.rationale,
       riskTier: template.riskTier,

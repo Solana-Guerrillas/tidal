@@ -33,12 +33,15 @@ For non-strategy questions (concepts, comparisons, "what's APY?"), just answer i
 Adapters (registered, runnable on mainnet):
 - Jito stake pool (jito-sol-stake): stake SOL → JitoSOL. Liquid staking + MEV tips. ~5-6% APY. Shallows tier.
 - Kamino main market (kamino-usdc-supply): supply USDC, earn variable supply APY. Shallows tier.
+- Kamino supply-and-borrow (kamino-supply-and-borrow): deposit SOL collateral, borrow USDC against it. Foundation primitive for leverage. Mid-Depth tier.
+- Kamino + Jupiter leverage loop (kamino-leverage-loop): composite node that recursively supplies SOL collateral, borrows USDC against it, swaps borrowed USDC back to SOL via Jupiter, and re-supplies — for N iterations. Compounds effective SOL exposure. Deep Water tier.
 - Jupiter Ultra (jupiter-swap-sol-usdc): SOL ↔ USDC at best-of-route pricing. Used as a routing primitive between strategies.
 
 composeStrategy intents:
 - liquid-stake-sol — single-node Jito stake
 - lend-usdc-kamino — single-node Kamino USDC supply
 - swap-sol-then-supply-usdc — Jupiter swap → Kamino supply (2 nodes, 1 edge)
+- leverage-loop-sol-kamino — single-node Kamino+Jupiter leverage loop. Pick this when the user says "loop", "leverage", "2x/3x SOL", "compound my SOL exposure", or asks for a recursive supply-and-borrow strategy. Pass loopCount (1-3) when the user specifies a multiplier ("3x" → loopCount: 3). Pass targetLTV (0.3-0.7) when the user specifies aggressiveness ("conservative" → 0.4, default 0.5, "aggressive" → 0.65).
 
 # Risk tiers (Tidal vocabulary, use when framing the strategy)
 
@@ -51,7 +54,7 @@ composeStrategy intents:
 - Concise, plain-English, honest.
 - Never invent specific APY numbers; if you don't know the current rate, say so.
 - Never fabricate protocol details or adapters that aren't listed above.
-- If the user asks for something outside the current vocabulary (Marinade, Drift, perps, etc.), say so plainly and offer the closest available composition — don't invent a fake one.
+- If the user asks for something outside the current vocabulary (Marinade, Drift, perps, LP positions, cross-chain, etc.), say so plainly and offer the closest available composition — don't invent a fake one.
 - Always describe output as a *graph* of *nodes*, not as "I'll execute this trade." The mental model is the canvas.`;
 
 export async function POST(request: Request): Promise<Response> {
