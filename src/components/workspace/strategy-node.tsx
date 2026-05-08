@@ -20,6 +20,7 @@ import { useNodeRunStatus } from "@/providers/run-status-provider";
 import { runStatusRingClass } from "@/lib/workspace/run-status-styles";
 import { useWorkspace } from "@/providers/workspace-provider";
 import {
+  effectiveLeveragedYield,
   formatPercent,
   formatUsd,
   leverageFactor,
@@ -81,17 +82,21 @@ export const StrategyNode = memo(
     //   1. Standard earn-side adapters (Jito stake, Kamino supply) with
     //      a live APY and an amount widget → 1-year compounded projection
     //      in the input asset's units (e.g., "≈ 0.0006 SOL/yr").
-    //   2. Leverage-loop node specifically → effective collateral
-    //      exposure derived from loopCount × targetLTV widgets ("1.5×
-    //      exposure"). True net-of-borrow yield needs the Kamino USDC
-    //      borrow rate which we don't surface yet — defer until that
-    //      lands.
+    //   2. Leverage-loop node → effective collateral exposure plus net
+    //      effective yield, derived from loopCount × targetLTV widgets
+    //      and the SOL-supply / USDC-borrow rates the adapter exposes
+    //      via apyBreakdown.
+    const apyBreakdown =
+      rateState.kind === "ready" && rateState.rate?.apyBreakdown
+        ? rateState.rate.apyBreakdown
+        : null;
     const projection = computeProjection({
       catalogItemId: data.catalogItemId,
       apy:
         rateState.kind === "ready" && rateState.rate
           ? rateState.rate.apy
           : null,
+      apyBreakdown,
       amount:
         typeof widgetValues.amount === "number" ? widgetValues.amount : null,
       loopCount:
@@ -408,6 +413,7 @@ StrategyNode.displayName = "StrategyNode";
 type ProjectionInput = {
   catalogItemId: string | undefined;
   apy: number | null;
+  apyBreakdown: Record<string, number> | null;
   amount: number | null;
   loopCount: number | null;
   targetLTV: number | null;
@@ -423,15 +429,28 @@ type ProjectionInput = {
  * propagate the moment the user types.
  */
 function computeProjection(input: ProjectionInput): string | null {
-  // Leverage-loop node gets a dedicated treatment: show effective
-  // collateral exposure derived from loop count + target LTV. We
-  // can't compute a true net-of-borrow yield without the Kamino
-  // USDC borrow rate, which we don't surface yet — keeping this honest.
+  // Leverage-loop node: show "Y× exposure · ≈X% net effective" by
+  // combining the user's loopCount/targetLTV widgets with the
+  // SOL-supply and USDC-borrow rates the adapter surfaces via
+  // apyBreakdown. Falls back to "exposure-only" string when rates
+  // aren't loaded yet.
   if (input.catalogItemId === "kamino-leverage-loop") {
     if (input.loopCount === null || input.targetLTV === null) return null;
     const factor = leverageFactor(input.loopCount, input.targetLTV);
     const ltvPct = (input.targetLTV * 100).toFixed(0);
-    return `${factor.toFixed(2)}× collateral exposure (${input.loopCount} loop${input.loopCount === 1 ? "" : "s"} × ${ltvPct}% LTV)`;
+    const exposure = `${factor.toFixed(2)}× exposure (${input.loopCount} loop${input.loopCount === 1 ? "" : "s"} × ${ltvPct}% LTV)`;
+    const supplyApy = input.apyBreakdown?.solSupply;
+    const borrowApy = input.apyBreakdown?.usdcBorrow;
+    if (
+      typeof supplyApy === "number" &&
+      typeof borrowApy === "number" &&
+      Number.isFinite(supplyApy) &&
+      Number.isFinite(borrowApy)
+    ) {
+      const net = effectiveLeveragedYield(supplyApy, borrowApy, factor);
+      return `${exposure} · ≈${formatPercent(net)} net effective`;
+    }
+    return exposure;
   }
 
   // For earn-side adapters with a live APY and an amount widget,

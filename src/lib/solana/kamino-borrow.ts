@@ -138,12 +138,48 @@ async function readPosition(
 }
 
 async function readRate(): Promise<APYQuote | null> {
-  // The cost surfaced on the strategy node here is the *borrow* APY, not
-  // a supply yield. We intentionally return null so the static
-  // "variable" placeholder stays visible in the UI; real
-  // borrowReserve.totalBorrowAPY() reads land alongside the position
-  // tracker work.
-  return null;
+  // Headline `apy` is the USDC *borrow* cost (this adapter has
+  // apyType: "cost" in the catalog — the user pays this rate on
+  // borrowed USDC). The full breakdown carries both rates so the
+  // leverage-loop node can compute net effective yield client-side
+  // without re-fetching: collateral leg earns SOL supply APY, debt
+  // leg costs USDC borrow APY.
+  const rpc = getSolanaRpc();
+  const market = await loadKaminoMainMarket();
+  const solReserve = market.getReserveByMint(
+    address(SOL_MINT_ADDRESS) as unknown as Parameters<
+      typeof market.getReserveByMint
+    >[0],
+  );
+  const usdcReserve = market.getReserveByMint(
+    address(USDC_MINT_ADDRESS) as unknown as Parameters<
+      typeof market.getReserveByMint
+    >[0],
+  );
+  if (!solReserve || !usdcReserve) {
+    throw new Error(
+      "Kamino main market missing SOL or USDC reserve — cannot read leverage rates.",
+    );
+  }
+  const slot = await rpc.getSlot().send();
+  const solSupplyApy = Number(
+    solReserve.totalSupplyAPY(
+      slot as unknown as Parameters<typeof solReserve.totalSupplyAPY>[0],
+    ),
+  );
+  const usdcBorrowApy = Number(
+    usdcReserve.totalBorrowAPY(
+      slot as unknown as Parameters<typeof usdcReserve.totalBorrowAPY>[0],
+    ),
+  );
+  return {
+    apy: usdcBorrowApy,
+    apyBreakdown: {
+      solSupply: solSupplyApy,
+      usdcBorrow: usdcBorrowApy,
+    },
+    fetchedAt: Date.now(),
+  };
 }
 
 async function buildTransaction(

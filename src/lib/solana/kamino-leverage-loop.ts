@@ -1,11 +1,19 @@
 import "server-only";
 
+import { address } from "@solana/kit";
+
 import {
   decimalToBaseUnits,
   getAdapterCatalogEntry,
 } from "./adapter-catalog";
+import { getSolanaRpc } from "./connection";
 import { jupiterSolUsdcSwapAdapter } from "./jupiter-swap";
 import { kaminoSupplyAndBorrowAdapter } from "./kamino-borrow";
+import {
+  SOL_MINT_ADDRESS,
+  USDC_MINT_ADDRESS,
+  loadKaminoMainMarket,
+} from "./kamino-shared";
 import type {
   APYQuote,
   BuildTransactionParams,
@@ -68,12 +76,50 @@ async function readPosition(
 }
 
 async function readRate(): Promise<APYQuote | null> {
-  // Effective rate depends on supply APY net of borrow APY scaled by
-  // the leverage factor. Computing this needs both rates from Kamino
-  // plus the user's loop count and LTV. Defer to a future
-  // "compounded yield calculator" feature; the position tracker shows
-  // the underlying borrow APY precisely.
-  return null;
+  // Effective net yield is a function of the user's loopCount and
+  // targetLTV widgets, so we can't compute it server-side. Instead we
+  // surface the underlying SOL-supply / USDC-borrow rates via
+  // apyBreakdown, and let the strategy-node card compute the live
+  // effective yield via effectiveLeveragedYield() the moment widgets
+  // change. Headline `apy` is the SOL supply rate as a sensible
+  // single-number fallback — the projection string is the canonical
+  // display.
+  const rpc = getSolanaRpc();
+  const market = await loadKaminoMainMarket();
+  const solReserve = market.getReserveByMint(
+    address(SOL_MINT_ADDRESS) as unknown as Parameters<
+      typeof market.getReserveByMint
+    >[0],
+  );
+  const usdcReserve = market.getReserveByMint(
+    address(USDC_MINT_ADDRESS) as unknown as Parameters<
+      typeof market.getReserveByMint
+    >[0],
+  );
+  if (!solReserve || !usdcReserve) {
+    throw new Error(
+      "Kamino main market missing SOL or USDC reserve — cannot read leverage rates.",
+    );
+  }
+  const slot = await rpc.getSlot().send();
+  const solSupplyApy = Number(
+    solReserve.totalSupplyAPY(
+      slot as unknown as Parameters<typeof solReserve.totalSupplyAPY>[0],
+    ),
+  );
+  const usdcBorrowApy = Number(
+    usdcReserve.totalBorrowAPY(
+      slot as unknown as Parameters<typeof usdcReserve.totalBorrowAPY>[0],
+    ),
+  );
+  return {
+    apy: solSupplyApy,
+    apyBreakdown: {
+      solSupply: solSupplyApy,
+      usdcBorrow: usdcBorrowApy,
+    },
+    fetchedAt: Date.now(),
+  };
 }
 
 async function buildTransaction(
