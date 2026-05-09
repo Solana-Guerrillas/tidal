@@ -1,11 +1,46 @@
 # Checkpoint
 
-**Last updated:** 2026-05-04 (Monday afternoon)
-**Branch:** main (clean, pushed to origin)
-**Latest commit:** `947104d` — feat(solana): live SOL price feed via Jupiter; wired into leverage loop (P2.1 #2)
-**Hackathon submission:** ~2026-05-10 (6 days out, ample buffer)
-**Phase 1 thesis demo:** ✅ shippable today
-**Phase 2.1 polish flight:** 2/4 done
+**Last updated:** 2026-05-09 (Friday evening — pre-restart pause)
+**Branch:** main (clean, pushed to `Solana-Guerrillas/tidal`)
+**Latest commit:** `642f2cb` — fix(ai+plan): swap-then-supply demo path + downstream-amount validation
+**Hackathon submission:** ~2026-05-10 (TOMORROW — final video recording day)
+**Phase 1 thesis demo:** ✅ shippable
+**Demo path locked:** swap-then-supply (Jupiter → Kamino USDC supply), NOT leverage loop
+
+## Resumption summary — what was happening at the cutoff
+
+In the middle of a hackathon-week polish push. Just finished pivoting the demo video script away from leverage-loop and onto the safer swap-then-supply path after hitting two recurring on-chain issues:
+
+1. **Jupiter Ultra `/order` rejects speculative builds** when wallet has no input asset yet (leverage-loop builds the swap before the borrow has landed). Fix path: pre-fund USDC OR refactor to lazy-build OR switch to legacy Jupiter `/quote` API. Workaround for the demo: use swap-then-supply which only validates SOL input.
+2. **Kamino `RefreshObligation` rejects with `0x1776`** when the obligation has accumulated state from prior partial runs. The SDK only enumerates current-call reserves in `remaining_accounts`, but Kamino expects ALL historical reserves on the obligation. Workaround for the demo: unwind to zero positions on `app.kamino.finance` before recording, OR use a fresh wallet.
+
+Both are documented as bugs #1 and #2 in `docs/hardening-plan.md`.
+
+## What's locked for the demo recording
+
+- **Script:** `video/script.md` (gitignored). 5 beats, 3:00 total, swap-then-supply primary path, Jito stake fallback. ComfyUI-for-DeFi bookended in cold open + close. Beat 2 leads with typed dataflow + upstream-amount hint instead of leverage-yield-recompute.
+- **AI compose:** the `swap-sol-then-supply-usdc` template now pre-populates Jupiter widgets (commit `642f2cb`). The downstream-amount validator no longer trips on the Kamino supply node receiving USDC from the swap.
+- **Test before recording:** type *"Swap 0.05 SOL into USDC and supply on Kamino"* on a wallet with a zeroed-out Kamino obligation, ~0.1 SOL balance. Both txs should land cleanly.
+
+## Pending pre-recording work
+
+- [ ] Reset demo wallet's Kamino obligation via `app.kamino.finance`
+- [ ] Pre-fund demo wallet with ~0.1 SOL
+- [ ] Dry run end-to-end: AI compose → typed dataflow demo → run → Investments panel updates
+- [ ] Record on localhost (Vercel deploy is for the submission link only, not recording)
+- [ ] Submit to Colosseum
+
+## Post-hackathon work queued
+
+`docs/hardening-plan.md` — comprehensive on-chain audit plan, 17–30 days estimated. Bug registry seeded with 10 known issues. Phase 0 (test infra), Phase 1 (adapter audit), Phase 2 (runner hardening), Phase 3 (cross-cutting refactors including lazy-build + dirty-obligation handling), Phase 4 (fix sprint), Phase 5 (production readiness).
+
+## Repo move
+
+Repo transferred to `https://github.com/Solana-Guerrillas/tidal.git` on 2026-05-06 (org name has double-r — Guerrillas, not Guerillas — caught a redirect on first push). Vercel install command switched to `bun install` to fix npm hoisting issues with Kamino's nested `@solana-program/compute-budget` dep.
+
+---
+
+## Strategic direction (locked 2026-05-04)
 
 ## Strategic direction (locked 2026-05-04)
 
