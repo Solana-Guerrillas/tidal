@@ -1,5 +1,7 @@
 import "server-only";
 
+import { blazeStakeAdapter } from "./blaze";
+import { blazeSolUnstakeAdapter } from "./blaze-unstake";
 import { jitoStakeAdapter } from "./jito";
 import { jitoSolUnstakeAdapter } from "./jito-unstake";
 import { jupiterSolUsdcSwapAdapter } from "./jupiter-swap";
@@ -16,6 +18,8 @@ export function registerAllAdapters(): void {
   if (registered) return;
   registerAdapter(jitoStakeAdapter);
   registerAdapter(jitoSolUnstakeAdapter);
+  registerAdapter(blazeStakeAdapter);
+  registerAdapter(blazeSolUnstakeAdapter);
   registerAdapter(kaminoUsdcSupplyAdapter);
   registerAdapter(kaminoUsdcWithdrawAdapter);
   registerAdapter(kaminoSupplyAndBorrowAdapter);

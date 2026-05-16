@@ -45,6 +45,11 @@ export const SWAP_ASSETS: SwapAsset[] = [
     mint: "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So",
     decimals: 9,
   },
+  {
+    symbol: "bSOL",
+    mint: "bSo13r4TkiE4KumL71LsHTPpL2euBYLFx6h9HP3piy1",
+    decimals: 9,
+  },
 ];
 
 export const SWAP_ASSET_SYMBOLS: string[] = SWAP_ASSETS.map((a) => a.symbol);
@@ -100,6 +105,70 @@ const JITO_ENTRY: AdapterCatalogEntry = {
       label: "Amount to stake (SOL)",
       min: 0,
       default: 0.01,
+      required: true,
+    },
+  ],
+  inputDecimals: 9,
+};
+
+const BLAZE_ENTRY: AdapterCatalogEntry = {
+  catalogItem: {
+    id: "blaze-sol-stake",
+    title: "Stake with BlazeStake",
+    description:
+      "Stake SOL and receive bSOL (liquid staking via Solblaze's SPL stake pool, ~6.5% APY, no MEV bonus — steadier than Jito).",
+    group: "strategy",
+    nodeKind: "strategy",
+    supportedInputAssets: ["SOL"],
+    primaryOutputAsset: "bSOL",
+    protocolLabel: "BlazeStake",
+    keywords: ["stake", "lst", "liquid staking", "bsol", "blaze", "solblaze"],
+  },
+  actionLabel: "Stake SOL",
+  apyDisplay: "~6.5%",
+  apyType: "earn",
+  outputAsset: "bSOL",
+  primaryHandleId: "next",
+  primaryHandleLabel: "Staked position",
+  widgets: [
+    {
+      key: "amount",
+      kind: "number",
+      label: "Amount to stake (SOL)",
+      min: 0,
+      default: 0.01,
+      required: true,
+    },
+  ],
+  inputDecimals: 9,
+};
+
+const BLAZE_UNSTAKE_ENTRY: AdapterCatalogEntry = {
+  catalogItem: {
+    id: "blaze-sol-unstake",
+    title: "Unstake bSOL",
+    description:
+      "Burn bSOL and receive SOL via the BlazeStake stake pool reserve (instant withdrawal, ~0.04% fee — no epoch delay).",
+    group: "strategy",
+    nodeKind: "strategy",
+    supportedInputAssets: ["bSOL"],
+    primaryOutputAsset: "SOL",
+    protocolLabel: "BlazeStake",
+    keywords: ["unstake", "redeem", "exit", "blaze", "bsol", "lst", "withdraw"],
+  },
+  actionLabel: "Unstake bSOL",
+  apyDisplay: "n/a",
+  apyType: "earn",
+  outputAsset: "SOL",
+  primaryHandleId: "next",
+  primaryHandleLabel: "Withdrawn SOL",
+  widgets: [
+    {
+      key: "amount",
+      kind: "number",
+      label: "Amount to unstake (bSOL)",
+      min: 0,
+      default: 0.005,
       required: true,
     },
   ],
@@ -420,6 +489,8 @@ const JUPITER_SWAP_ENTRY: AdapterCatalogEntry = {
 export const ADAPTER_CATALOG_ENTRIES: AdapterCatalogEntry[] = [
   JITO_ENTRY,
   JITO_UNSTAKE_ENTRY,
+  BLAZE_ENTRY,
+  BLAZE_UNSTAKE_ENTRY,
   KAMINO_ENTRY,
   KAMINO_WITHDRAW_ENTRY,
   KAMINO_BORROW_ENTRY,
