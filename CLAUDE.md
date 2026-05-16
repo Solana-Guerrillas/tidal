@@ -11,6 +11,7 @@ Your job is to help build out the working product — backend adapters, AI agent
 1. `docs/design-thesis.md` — names the ComfyUI paradigm, maps concepts to Tidal, and lists the engineering implications. Foundational.
 2. `docs/tidal-prd.md` (v2.2+) — feature roadmap organized around the composition paradigm.
 3. `docs/architecture.md` — current live frontend architecture and the backend layer plan.
+4. `docs/post-hackathon-roadmap.md` — six post-hackathon workstreams (hardening, revenue, database, templates, UI, adapter expansion) with sequencing. Active planning surface.
 
 If a request would bypass the typed-graph mental model (e.g., "let's just have the agent execute trades from chat without showing a graph"), push back — that's the anti-paradigm.
 

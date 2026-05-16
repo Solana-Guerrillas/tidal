@@ -1,10 +1,27 @@
 # Checkpoint
 
-**Last updated:** 2026-05-09 (Friday evening — pre-restart pause)
+**Last updated:** 2026-05-16 (post-hackathon, roadmap captured)
 **Branch:** main (clean, pushed to `Solana-Guerrillas/tidal`)
-**Latest commit:** `642f2cb` — fix(ai+plan): swap-then-supply demo path + downstream-amount validation
-**Hackathon submission:** ~2026-05-10 (TOMORROW — final video recording day)
-**Phase 1 thesis demo:** ✅ shippable
+**Phase 1 thesis demo:** ✅ shipped to Colosseum (~2026-05-10)
+**Current focus:** post-hackathon roadmap — see `docs/post-hackathon-roadmap.md` for the six workstreams.
+
+## Session 2026-05-13 / -14 — post-submission engineering pickup
+
+- **Bug registry seeded** at `docs/internal/bug-registry.md` (gitignored) with all 10 carry-over bugs.
+- **Bug #1 (Jupiter speculative-build) fixed.** `jupiter-swap.ts` now has two codepaths: Ultra `/order` for standalone Swap (preserves Beam relayer UX) and a new exported `buildJupiterSwapLazy` using `lite-api.jup.ag/swap/v1/quote` + `/swap` (no taker pre-validation). `kamino-leverage-loop.ts` calls the lazy path. **Needs mainnet verification** with a wallet holding zero USDC.
+- **Bug #2 (Kamino `0x1776`) re-opened.** Original "SDK misses historical reserves" hypothesis disproved by reading the klend SDK source — it already enumerates every reserve in the obligation's deposits + borrows. Kit role encoding also ruled out. `0x1776` = `InvalidAccountInput` (not `ObligationStale`/`ReserveStale`), so the failing account is probably elsewhere — referrer token state, elevation group mismatch, or obsolete reserve. **Needs reproduction with full program logs** before writing a fix. See bug-registry.md entry #2 Investigation 2026-05-13.
+- **BlazeStake (bSOL) stake + unstake adapters shipped.** Pivoted from Marinade (which uses a custom program, would have needed a new SDK dep) to BlazeStake (pure SPL stake-pool, near-copy of Jito). `bSOL` added to `SWAP_ASSETS`. Unlocks the LST rate-shop pitch (Jito vs BlazeStake) and sets up future Sanctum INF cleanly. Two new files: `src/lib/solana/blaze.ts`, `src/lib/solana/blaze-unstake.ts`. Lint + typecheck clean. **Needs mainnet verification.**
+- **Roadmap doc** at `docs/post-hackathon-roadmap.md` capturing six workstreams: (1) wrap up hardening, (2) revenue strategy, (3) Neon database, (4) DB-persisted templates, (5) UI per 0xJulo feedback, (6) adapter expansion + stress testing. Sequencing: Track A (hardening → DB → templates), Track B (UI + adapters in parallel), Track C (revenue thinking).
+
+### Pre-commit checklist for current session
+
+- [ ] Mainnet smoke: leverage-loop with empty-USDC wallet (Bug #1 verification)
+- [ ] Mainnet smoke: BlazeStake stake → wallet shows bSOL → unstake
+- [ ] Commit the four files (`jupiter-swap.ts`, `kamino-leverage-loop.ts`, `adapter-catalog.ts`, `adapters.ts`) + the two new files (`blaze.ts`, `blaze-unstake.ts`) + the roadmap doc + CLAUDE.md required-reading bump
+
+## Pre-submission state (kept for reference)
+
+**Hackathon submission:** ~2026-05-10 — Phase 1 thesis demo shipped to Colosseum.
 **Demo path locked:** swap-then-supply (Jupiter → Kamino USDC supply), NOT leverage loop
 
 ## Resumption summary — what was happening at the cutoff
