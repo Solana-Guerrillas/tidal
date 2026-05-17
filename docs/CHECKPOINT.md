@@ -1,9 +1,32 @@
 # Checkpoint
 
-**Last updated:** 2026-05-16 (post-hackathon, roadmap captured)
-**Branch:** main (clean, pushed to `Solana-Guerrillas/tidal`)
+**Last updated:** 2026-05-17 (pre-shell-restart)
+**Branch:** main @ `5f08e11` — clean, pushed to `Solana-Guerrillas/tidal`
 **Phase 1 thesis demo:** ✅ shipped to Colosseum (~2026-05-10)
 **Current focus:** post-hackathon roadmap — see `docs/post-hackathon-roadmap.md` for the six workstreams.
+
+## Resumption summary
+
+Three commits landed on main this week:
+- `23642c6` fix(solana): bypass Jupiter Ultra speculative-validation in leverage-loop (Bug #1)
+- `c04c12a` feat(solana): add BlazeStake (bSOL) stake + unstake adapters
+- `5f08e11` docs: post-hackathon roadmap + checkpoint update
+
+Build verified clean before push (`bun run lint`, `bunx tsc --noEmit`, `bun run build`).
+
+### Immediate pickup when shell restarts
+
+- **Mainnet smokes still pending** — none of the three changes have been on-chain verified yet:
+  1. BlazeStake stake (drop "Stake with BlazeStake", 0.01 SOL, Run → wallet shows bSOL)
+  2. BlazeStake unstake (drop "Unstake bSOL", ~0.005 bSOL, Run → SOL returns)
+  3. Bug #1 fix (wallet with SOL + zero USDC, Leverage Loop, Run → no Jupiter pre-validation error)
+- **Bug #2 (Kamino `0x1776`)** still needs a mainnet reproduction with full program logs. Until that lands, repeat-Kamino users hit a wall.
+- **0xJulo's UI feedback list** still uncaptured — section #5 of the roadmap has a placeholder template ready.
+
+### Operational note
+
+- Repo branch protection on main was relaxed (or admin bypass active) — direct pushes now work, no PR dance needed.
+- Dev server was running in this shell session and will die on restart. Restart with `bun run dev` when you want to test again.
 
 ## Session 2026-05-13 / -14 — post-submission engineering pickup
 
